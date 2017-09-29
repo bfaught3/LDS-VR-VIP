@@ -17,11 +17,25 @@
 
     Tutorial 03 - First triangle
 */
+#ifdef __APPLE__
+#  include <OpenGL/gl.h>
+#  include <OpenGL/glu.h>
+#  include <OpenGL/gl3.h>
+#  include <GLUT/glut.h>
+#else
+#  include <GL/gl.h>
+#  include <GL/glu.h>
+#  include <GL/glew.h>
+#  include <GL/freeglut.h>
+#endif
 
 #include <stdio.h>
-#include <GL/glew.h>
 #include <GL/freeglut.h>
 #include "ogldev_math_3d.h"
+
+// This code breaks when using xcode due to some openGL libraries being deprecated such GLUT in MacOS
+// They want to use cocoa instead but since we will be working with windows pc we shouldn't focus to hard on getting
+// this code to work
 
 GLuint VBO;
 
