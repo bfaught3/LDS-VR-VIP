@@ -1,0 +1,7 @@
+# MothVR2
+
+This folder includes a simple tutorial on how to get rectangle box moving with keyboard inputs.
+
+**Current issue is compiling using Visual Studio 2017. Unability to link glut32.lib. Not any help on how to fix this issues for 2017.**
+
+Solution: Move to using Visual Studio 2015. Double check which version is currently being used in the lab computer.
