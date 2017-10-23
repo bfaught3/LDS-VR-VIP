@@ -21,7 +21,9 @@
 float xp = 0, yp = 0;
 int it = 0, it1 = 0; //iterator for iterator
 int mod = 1;
-int delay = 10;
+int delayArr[4] = { 5, 10, 20, 100 };
+int delayIt = 0;
+int delay = delayArr[delayIt];
 int boost = 7;
 bool clear = 0;
 static unsigned int fps_start = 0;
@@ -59,21 +61,26 @@ void billybob(int bob) {
 	//while (1) {
 	it1++;
 	//printf("%d\n", it1);
-	if (it1 % mod == 0) {
+	//if (it1 % mod == 0) {
+	if (it1 == mod) {
 		it1 = 0;
 		it++;
-		if (it % 700 == 0) {
+		//if (it % 700 == 0) {
 			//time_t end;
 			//end = time(0);
 			//printf("%d", end);
 			//printf("Display func took this amount of time : %0.6d \n", difftime(start, end));
+		//it = 0;
+
+		//}
+		//else if (it % 350 == 0) {
+
+		//}
+		//if (it % (700 / boost) < (350 / boost)) {
+		if (it >= (700 / boost)) {
 			it = 0;
-
 		}
-		else if (it % 350 == 0) {
-
-		}
-		if (it % (700 / boost) < (350 / boost)) {
+		if (it < (350 / boost)) {
 			xp--;
 		}
 		else {
@@ -99,8 +106,9 @@ void key_pressed(int key, int x, int y) {
 	case GLUT_KEY_RIGHT:
 		//xp--;
 		//it++;
-		if (mod > 1) {
-			mod--;
+		if (delayIt > 0) {
+			delayIt--;
+			delay = delayArr[delayIt];
 		}
 		//else {
 		//	xp++;
@@ -110,7 +118,11 @@ void key_pressed(int key, int x, int y) {
 	case GLUT_KEY_LEFT:
 		//xp++;
 		//it++;
-		mod++;
+		if (delayIt < 3) {
+			delayIt++;
+			delay = delayArr[delayIt];
+		}
+		//mod++;
 		glutPostRedisplay(); //redraws window
 		break;
 	}
@@ -176,7 +188,7 @@ int main(int argc, char** argv) {
 	//glutTimerFunc(1000, billybob, 0);
 	glutDisplayFunc(display);
 	//printf("finished display\n");
-	glutTimerFunc(1, billybob, 0);
+	glutTimerFunc(0, billybob, 0);
 	//printf("finished billybob\n");
 
 	glClearColor(0, 0, 0, 0);
@@ -187,6 +199,6 @@ int main(int argc, char** argv) {
 	//printf("Where it's hitting");
 	printf("\n");
 	glutMainLoop();
-	glutTimerFunc(1, billybob, 0);
+	//glutTimerFunc(1, billybob, 0);
 	return 0;
 }
