@@ -1,18 +1,13 @@
 #include <iostream>
-//#include "..\..\..\Libs and Include\Include\glut.h"
 
 #define FREEGLUT_STATIC
 #define _LIB
 #define FREEGLUT_LIB_PRAGMAS 0
-//#include <GL/freeglut_ext.h>
 #include <GL/freeglut_std.h>
 #include <GL/GL.h>
 #include <GL/GLU.h>
 #include <GL/freeglut.h>
 #include <GL/glut.h>
-#include <time.h>       /* time_t, clock, CLOCKS_PER_SEC */
-#include <math.h>       /* sqrt */
-//#include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #define FREEGLUT_STATIC
 #define _LIB
@@ -28,26 +23,24 @@ int boost = 7;
 bool clear = 0;
 static unsigned int fps_start = 0;
 static unsigned int fps_frames = 0;
+static int num = 550, num2 = 600, num3 = 800;
 
 void display() {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clears colors
 	glColor3f(255, 255, 255); // color white for our rectangle
 	
 	glBegin(GL_QUADS);  //Rectangle drawing
-						// Will be using xp and yp as our changing x-position and y-position in our window
+// Will be using xp and yp as our changing x-position and y-position in our window
 	glVertex2i(600 + boost * xp, 0 + yp);
 	glVertex2i(550 + boost * xp, 0 + yp);
 	glVertex2i(550 + boost * xp, 800 + yp);
 	glVertex2i(600 + boost * xp, 800 + yp);
-
-
 
 	glEnd();
 	glutSwapBuffers(); //done with current frame. Swap to being on the next.
 }
 
 void speedManager(int speed) {
-	
 	
 	int delta_t = glutGet(GLUT_ELAPSED_TIME) - fps_start;
 	if (delta_t > 1000) {
@@ -130,6 +123,19 @@ void letter_pressed(unsigned char key, int x, int y) {
 		}
 		glutPostRedisplay();
 		break;
+	case 114:
+		glPushMatrix();
+		glTranslatef(200, 300, 0);
+		glRotatef(15, 0, 0, 1);
+		glBegin(GL_QUADS);
+		{
+			glVertex2f(-num / 2, -num2 / 2);
+			glVertex2f(-num2 / 2, -num2 / 2);
+			glVertex2f(num2 / 2, num3 / 2);
+			glVertex2f(num / 2, num3/ 2);
+		}
+		glEnd();
+		glPopMatrix();
 	}
 }
 
