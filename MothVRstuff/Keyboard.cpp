@@ -23,7 +23,7 @@ float xp = 0, yp = 0;
 int it = 0, it1 = 0, it2 = 0; //iterator for iterator
 int mod = 1;
 //int delayArr[4] = { 5, 10, 20, 100 };
-int delayArr[4] = { 4, 8, 16, 80 };
+float delayArr[4] = { 125.0, 250.0, 500.0, 2500.0 };
 int delayIt = 0;
 int delay = delayArr[delayIt];
 //double boost = 6.4;
@@ -49,8 +49,25 @@ float bias = 0.0;
 int32       error = 0;
 TaskHandle  taskHandle = 0;
 int32       read;
-float64     data[200000];
-float64		currentData[2];
+float64     data[1200000];
+float64		currentData[1200000];
+float64		currai0[200000];
+float64		currai1[200000];
+float64		currai2[200000];
+float64		currai3[200000];
+float64		currai4[200000];
+float64		currai5[200000];
+int32		queueit = 0;
+float64		bias0, bias1, bias2, bias3, bias4, bias5;
+/*
+int64		ai0it = 0;
+int64		ai1it = 0;
+int64		ai2it = 0;
+int64		ai3it = 0;
+int64		ai4it = 0;
+int64		ai5it = 0;
+*/
+
 char        errBuff[2048] = { '\0' };
 
 void display() {
@@ -99,6 +116,52 @@ void display() {
 	glutSwapBuffers(); //done with current frame. Swap to being on the next.
 }
 
+float64 calcFx() { // not finished, also we only need to worry about the first line of the calibration matrix to get Fx
+	float64 avgai0 = 0, avgai1 = 0, avgai2 = 0, avgai3 = 0, avgai4 = 0, avgai5 = 0;
+	for (int i = 0; i < read; i++) {
+		int32 j = queueit - read + i;
+		if (j < 0) {
+			avgai0 += currai0[j + 200000];
+			avgai1 += currai1[j + 200000];
+			avgai2 += currai2[j + 200000];
+			avgai3 += currai3[j + 200000];
+			avgai4 += currai4[j + 200000];
+			avgai5 += currai5[j + 200000];
+		}
+		else {
+			avgai0 += currai0[j];
+			avgai1 += currai1[j];
+			avgai2 += currai2[j];
+			avgai3 += currai3[j];
+			avgai4 += currai4[j];
+			avgai5 += currai5[j];
+		}
+	}
+	avgai0 = avgai0 / read;
+	avgai1 = avgai1 / read;
+	avgai2 = avgai2 / read;
+	avgai3 = avgai3 / read;
+	avgai4 = avgai4 / read;
+	avgai5 = avgai5 / read;
+
+	float64 Fx = (-0.000352378 * avgai0) + (0.020472451 * avgai1) + ((-0.02633045) * avgai2) + ((-0.688977299) * avgai3) + (0.000378075 * avgai4) + (0.710008955 * avgai5);
+	return Fx;
+}
+
+float64 biasing(float64 *readArray) {
+	float64 avgai = 0;
+	for (int i = 0; i < read; i++) {
+		int32 j = queueit - read + i;
+		if (j < 0) {
+			avgai += readArray[j + 200000];
+		}
+		else {
+			avgai += readArray[j];
+		}
+	}
+	avgai = avgai / read;
+	return avgai;
+}
 /*
 ** This function allows to change the speed of the bar
 */
@@ -166,7 +229,7 @@ Error:
 		it++;
 		
 		//if (it > (double(800 / boost))) {
-		if (it >= 125) {
+		if (it >= 2500) {
 		//if (it > 800) {
 		//if (it >= (2000 / boost)) {
 			it = 0;
@@ -185,12 +248,12 @@ Error:
 		}
 		*/
 		//xp = xp - sinf(((float)it / (1256.0 / boost)) * PI);
-		xp = -sinf(((float)it / 62.5) * PI);
+		xp = -sinf(((float)it / (delay/2)) * PI);
 		//xp = xp - sinf(((float)it / (400.0)) * PI);
 		//if (xp*xp < 0.1)
 			//printf("%f", 550 + boost * xp);
 
-		DAQmxErrChk(DAQmxReadAnalogF64(taskHandle, 2, -1.0, DAQmx_Val_GroupByChannel, currentData, 2, &read, NULL));
+		DAQmxErrChk(DAQmxReadAnalogF64(taskHandle, -1, -1.0, DAQmx_Val_GroupByChannel, currentData, 1200000, &read, NULL));
 		goto Skip;
 	Error:
 		if (DAQmxFailed(error))
@@ -203,23 +266,40 @@ Error:
 			printf("DAQmx Error: %s\n", errBuff);
 
 	Skip:
-		if (currentData[1] * currentData[1] < 25.0) {
-			lx = currentData[1] - bias;
+		for (int i = 0; i < read; i++) {
+			if (queueit >= 200000) {
+				queueit = 0;
+			}
+			currai0[queueit] = currentData[i] - bias0;
+			currai1[queueit] = currentData[i + read] - bias1;
+			currai2[queueit] = currentData[i + (read * 2)] - bias2;
+			currai3[queueit] = currentData[i + (read * 3)] - bias3;
+			currai4[queueit] = currentData[i + (read * 4)] - bias4;
+			currai5[queueit] = currentData[i + (read * 5)] - bias5;
+			queueit++;
 		}
-		else {
-			lx = 0.0;
+		//if (currentData[1] * currentData[1] < 25.0) {
+		//	lx = currentData[1] - bias;
+		//}
+		//else {
+		//	lx = 0.0;
+		//}
+		if (calcFx() * calcFx() < 5) { // Do something to catch the NaN problem
+			lx = calcFx();
 		}
-		
+		//lx = calcFx();
+
 		printf("%f\n", lx);
+		//printf("Acquired %d samples\n", (int)read);
 
 		glutPostRedisplay(); //redraws window
-		glutTimerFunc(delay, speedManager, 0);
+		glutTimerFunc(4, speedManager, 0);
 
 	}
 	else {
 		
 		glutPostRedisplay();
-		glutTimerFunc(delay, speedManager, 0);
+		glutTimerFunc(4, speedManager, 0);
 	}
 
 }
@@ -317,8 +397,8 @@ int main(int argc, char** argv) {
 
 	// IMPORTANT
 	//changed Dev1 to Dev5 as the connection established. So verify what Dev is being used to update this code. DEV5 is our force torque.
-	DAQmxErrChk(DAQmxCreateAIVoltageChan(taskHandle, "Dev5/ai0", "", DAQmx_Val_Cfg_Default, -10.0, 10.0, DAQmx_Val_Volts, NULL));
-	DAQmxErrChk(DAQmxCfgSampClkTiming(taskHandle, "", 10000.0, DAQmx_Val_Rising, DAQmx_Val_ContSamps, 200000));
+	DAQmxErrChk(DAQmxCreateAIVoltageChan(taskHandle, "Dev5/ai0:5", "", DAQmx_Val_Cfg_Default, -10.0, 10.0, DAQmx_Val_Volts, NULL));
+	DAQmxErrChk(DAQmxCfgSampClkTiming(taskHandle, "", 10000.0, DAQmx_Val_Rising, DAQmx_Val_ContSamps, 1200000));
 	// DAQmx Start Code
 	DAQmxErrChk(DAQmxStartTask(taskHandle));
 	printf("\ngot here");
@@ -326,11 +406,12 @@ int main(int argc, char** argv) {
 	//for (int it = 0; it < 1000; it++) {
 	//printf("%f\n", data[it]);
 	//}
+	//printf("%f\n", data[0]);
+	DAQmxErrChk(DAQmxReadAnalogF64(taskHandle, 200000, -1.0, DAQmx_Val_GroupByChannel, data, 1200000, &read, NULL));
 	printf("%f\n", data[0]);
-	DAQmxErrChk(DAQmxReadAnalogF64(taskHandle, 200000, -1.0, DAQmx_Val_GroupByChannel, data, 200000, &read, NULL));
 	printf("\ngot passed through analog");
 	printf("%f\n", data[199999]);
-	bias = data[0];
+	//bias = data[0];
 	// Stop and clear task
 	printf("Acquired %d samples\n", (int)read);
 	//for (int it = 0; it < 200000; it++) {
@@ -338,9 +419,27 @@ int main(int argc, char** argv) {
 	//}
 	//printf("%f\n", data[199999]);
 	//printf("Acquired %d samples\n", (int)read);
-	DAQmxErrChk(DAQmxReadAnalogF64(taskHandle, 2, -1.0, DAQmx_Val_GroupByChannel, &data[199998], 2, &read, NULL));
+	//DAQmxErrChk(DAQmxReadAnalogF64(taskHandle, 2, -1.0, DAQmx_Val_GroupByChannel, &data[199998], 2, &read, NULL));
 	printf("\ngot passed through analog");
-	printf("%f\n", data[199999]);
+	printf("%f\n", data[1199999]);
+	for (int i = 0; i < read; i++) {
+		if (queueit >= 200000) {
+			queueit = 0;
+		}
+		currai0[queueit] = data[i];
+		currai1[queueit] = data[i + read];
+		currai2[queueit] = data[i + (read * 2)];
+		currai3[queueit] = data[i + (read * 3)];
+		currai4[queueit] = data[i + (read * 4)];
+		currai5[queueit] = data[i + (read * 5)];
+		queueit++;
+	}
+	bias0 = biasing(currai0);
+	bias1 = biasing(currai1);
+	bias2 = biasing(currai2);
+	bias3 = biasing(currai3);
+	bias4 = biasing(currai4);
+	bias5 = biasing(currai5);
 	/*
 Error:
 	if (DAQmxFailed(error))
@@ -392,6 +491,7 @@ Error:
 	}
 	if (DAQmxFailed(error))
 		printf("DAQmx Error: %s\n", errBuff);
+		getchar();
 Skip:
 	glutMainLoop();
 	return 0;
