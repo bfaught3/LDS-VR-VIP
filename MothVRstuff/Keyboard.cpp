@@ -34,6 +34,7 @@ int delay = delayArr[delayIt];
 float boost = 175.0;
 //int boost = 4;
 bool clear = 0;
+bool centering = 0;
 static unsigned int fps_start = 0;
 static unsigned int fps_frames = 0;
 static int num = 550, num2 = 600, num3 = 800;
@@ -354,6 +355,10 @@ Error:
 		//else {
 		//	lx = 0.0;
 		//}
+		if (centering) {
+			lx = 0;
+			centering = 0;
+		}
 		if (calcFeedback() * calcFeedback() < 5) { // Do something to catch the NaN problem
 			lx = calcFeedback();
 		}
@@ -438,6 +443,16 @@ void letter_pressed(unsigned char key, int x, int y) {
 		glutPostRedisplay();
 		break;
 	//Not implemented yet
+	case 99:
+		lx = -aggrlx;
+		centering = 1;
+		glutPostRedisplay();
+		break;
+	case 67:
+		lx = -aggrlx;
+		centering = 1;
+		glutPostRedisplay();
+		break;
 	case 114:
 		printf("We are entering our switch case\n");
 		glPushMatrix();
