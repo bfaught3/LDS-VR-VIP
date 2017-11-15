@@ -1,6 +1,8 @@
 #define FREEGLUT_STATIC
 #define _LIB
 #define FREEGLUT_LIB_PRAGMAS 0
+#define _SECURE_SCL_DEPRECATE 0
+#define _CRT_SECURE_NO_WARNINGS 0
 
 // OpenGL is pretty senstive so our header file glut.h has to be the first on our include files
 #include <GL/glut.h> // MUST BE FIRST (not including MACROS. Those are fine first.)
@@ -18,6 +20,8 @@
 #define FREEGLUT_LIB_PRAGMAS 0
 #define PI 3.14159265
 #define DAQmxErrChk(functionCall) if( DAQmxFailed(error=(functionCall)) ) goto Error; else
+
+void writeShit();
 
 float xp = 0, yp = 0;
 int it = 0, it1 = 0, it2 = 0; //iterator for iterator
@@ -43,20 +47,25 @@ float angle = 0.0;
 float lx = 0.0f, lz = -1.0f;
 // XZ position of the camera
 float x = 0.0f, z = 0.0f;
+float aggrlx = 0.0f;
 
 float bias = 0.0;
+bool written = 0;
 
 int32       error = 0;
 TaskHandle  taskHandle = 0;
 int32       read;
-float64     data[1200000];
-float64		currentData[1200000];
-float64		currai0[200000];
-float64		currai1[200000];
-float64		currai2[200000];
-float64		currai3[200000];
-float64		currai4[200000];
-float64		currai5[200000];
+float64     data[1400700];
+float64		currentData[1400700];
+float64		currai0[200100];
+float64		currai1[200100];
+float64		currai2[200100];
+float64		currai3[200100];
+float64		currai4[200100];
+float64		currai5[200100];
+int64		currai6[200100];
+float64		currxp[200100];
+float64		currxpcl[200100];	// closed loop
 int32		queueit = 0;
 float64		bias0, bias1, bias2, bias3, bias4, bias5;
 /*
@@ -116,36 +125,63 @@ void display() {
 	glutSwapBuffers(); //done with current frame. Swap to being on the next.
 }
 
-float64 calcFx() { // not finished, also we only need to worry about the first line of the calibration matrix to get Fx
-	float64 avgai0 = 0, avgai1 = 0, avgai2 = 0, avgai3 = 0, avgai4 = 0, avgai5 = 0;
+void writeShit() {
+	FILE * fileP = NULL;
+
+	char filename;
+
+	fileP = fopen("test.txt", "w");
+	
+	if (fileP != NULL) {
+		
+		for (int i = 0; i < 200100; i++) {
+			int helperQueue = queueit + i;
+			if (helperQueue >= 200100) {
+				helperQueue -= 200100;
+			}
+			fprintf(fileP, "%f, %f, %f, %f, %f, %f, %f, %f, %i\n", currxp[helperQueue], currxpcl[helperQueue], currai0[helperQueue], currai1[helperQueue], currai2[helperQueue], currai3[helperQueue], currai4[helperQueue], currai5[helperQueue], currai6[helperQueue]);
+		}
+		fclose(fileP);
+	}
+	else {
+		printf("Our file cannot be written to");
+	}
+
+
+
+
+	//printf("now: %d-%d-%d %d:%d:%d\n", tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec);
+
+}
+float64 calcFeedback() { // not finished, also we only need to take the average of what's new in currai0
+	float64 avgai0 = 0;
 	for (int i = 0; i < read; i++) {
 		int32 j = queueit - read + i;
 		if (j < 0) {
-			avgai0 += currai0[j + 200000];
-			avgai1 += currai1[j + 200000];
-			avgai2 += currai2[j + 200000];
-			avgai3 += currai3[j + 200000];
-			avgai4 += currai4[j + 200000];
-			avgai5 += currai5[j + 200000];
+			avgai0 += currai0[j + 200100];
 		}
 		else {
 			avgai0 += currai0[j];
-			avgai1 += currai1[j];
-			avgai2 += currai2[j];
-			avgai3 += currai3[j];
-			avgai4 += currai4[j];
-			avgai5 += currai5[j];
 		}
 	}
 	avgai0 = avgai0 / read;
-	avgai1 = avgai1 / read;
-	avgai2 = avgai2 / read;
-	avgai3 = avgai3 / read;
-	avgai4 = avgai4 / read;
-	avgai5 = avgai5 / read;
 
-	float64 Fx = (-0.000352378 * avgai0) + (0.020472451 * avgai1) + ((-0.02633045) * avgai2) + ((-0.688977299) * avgai3) + (0.000378075 * avgai4) + (0.710008955 * avgai5);
-	return Fx;
+	return avgai0;
+}
+
+float64 * matrixMult(float64 ai0, float64 ai1, float64 ai2, float64 ai3, float64 ai4, float64 ai5) { // not finished, also we only need to worry about the first line of the calibration matrix to get Fx
+
+	float64 Fx = ((-0.000352378) * ai0) + (0.020472451 * ai1) + ((-0.02633045) * ai2) + ((-0.688977299) * ai3) + (0.000378075 * ai4) + (0.710008955 * ai5);
+	float64 Fy = ((-0.019191418) * ai0) + (0.839003543 * ai1) + ((-0.017177775) * ai2) + ((-0.37643613) * ai3) + (0.004482987 * ai4) + ((-0.434163392) * ai5);
+	float64 Fz = (0.830046806 * ai0) + (0.004569748 * ai1) + (0.833562339 * ai2) + (0.021075403 * ai3) + (0.802936538 * ai4) + ((-0.001350335) * ai5);
+	float64 Tx = ((-0.316303442) * ai0) + (5.061378026 * ai1) + (4.614179159 * ai2) + ((-2.150699522) * ai3) + ((-4.341889297) * ai4) + ((-2.630773662) * ai5);
+	float64 Ty = ((-5.320003676) * ai0) + ((-0.156640061) * ai1) + (2.796170871 * ai2) + (4.206523866 * ai3) + (2.780562472 * ai4) + ((-4.252850011) * ai5);
+	float64 Tz = ((-0.056240509) * ai0) + (3.091367987 * ai1) + (0.122101875 * ai2) + (2.941467741 * ai3) + (0.005876647 * ai4) + (3.094672928 * ai5);
+
+	Tx = Fy * 94.5 + Tx * 1;
+	Ty = Fx * (-94.5) + Ty * 1;
+	float64 transformedData[6] = { Fx, Fy, Fz, Tx, Ty, Tz };
+	return transformedData;
 }
 
 float64 biasing(float64 *readArray) {
@@ -153,7 +189,7 @@ float64 biasing(float64 *readArray) {
 	for (int i = 0; i < read; i++) {
 		int32 j = queueit - read + i;
 		if (j < 0) {
-			avgai += readArray[j + 200000];
+			avgai += readArray[j + 200100];
 		}
 		else {
 			avgai += readArray[j];
@@ -174,6 +210,7 @@ void speedManager(int speed) {
 		fps_frames = 0;
 		fps_start = glutGet(GLUT_ELAPSED_TIME);
 	}
+	
 
 	/*
 	** Add the closed-loop stuff here.
@@ -222,6 +259,13 @@ Error:
 	//gluLookAt(0.0f, 0.0f, 10.0f,
 	//	0.0f, 0.0f, 0.0f,
 	//	0.0f, 1.0f, 0.0f);
+	if (currai6[queueit - 1] == 0 && !written) {
+		writeShit();
+		written = 1;
+	}
+	if (currai6[queueit - 1] == 1) {
+		written = 0;
+	}
 	it1++;
 	
 	if (it1 == 1) {
@@ -248,12 +292,14 @@ Error:
 		}
 		*/
 		//xp = xp - sinf(((float)it / (1256.0 / boost)) * PI);
+		float64 tempxp = boost * xp;
+		aggrlx += lx;
 		xp = -sinf(((float)it / (delay/2)) * PI);
 		//xp = xp - sinf(((float)it / (400.0)) * PI);
 		//if (xp*xp < 0.1)
 			//printf("%f", 550 + boost * xp);
 
-		DAQmxErrChk(DAQmxReadAnalogF64(taskHandle, -1, -1.0, DAQmx_Val_GroupByChannel, currentData, 1200000, &read, NULL));
+		DAQmxErrChk(DAQmxReadAnalogF64(taskHandle, -1, -1.0, DAQmx_Val_GroupByChannel, currentData, 1400700, &read, NULL));
 		goto Skip;
 	Error:
 		if (DAQmxFailed(error))
@@ -267,25 +313,49 @@ Error:
 
 	Skip:
 		for (int i = 0; i < read; i++) {
-			if (queueit >= 200000) {
+			if (queueit >= 200100) {
 				queueit = 0;
 			}
+			float64 * tempData = matrixMult((currentData[i] - bias0), (currentData[i + read] - bias1), (currentData[i + (read * 2)] - bias2), (currentData[i + (read * 3)] - bias3), (currentData[i + (read * 4)] - bias4), (currentData[i + (read * 5)] - bias5));
+			/*
 			currai0[queueit] = currentData[i] - bias0;
 			currai1[queueit] = currentData[i + read] - bias1;
 			currai2[queueit] = currentData[i + (read * 2)] - bias2;
 			currai3[queueit] = currentData[i + (read * 3)] - bias3;
 			currai4[queueit] = currentData[i + (read * 4)] - bias4;
 			currai5[queueit] = currentData[i + (read * 5)] - bias5;
+			currai6[queueit] = currentData[i + (read * 6)];
+			*/
+			currai0[queueit] = tempData[0];
+			currai1[queueit] = tempData[1];
+			currai2[queueit] = tempData[2];
+			currai3[queueit] = tempData[3];
+			currai4[queueit] = tempData[4];
+			currai5[queueit] = tempData[5];
+			currai6[queueit] = currentData[i + (read * 6)];
+			currxp[queueit] = tempxp;
+			currxpcl[queueit] = tempxp - aggrlx;
 			queueit++;
 		}
+		//printf("\n%f", currentData[read * 7 - 1]);
+		//printf("\n%i", currai6[queueit - 1]);
+		/*
+		if (currai6[queueit - 1] == 0 && !written) {
+			writeShit();
+			written = 1;
+		}
+		if (currai6[queueit - 1] == 1) {
+			written = 0;
+		}
+		*/
 		//if (currentData[1] * currentData[1] < 25.0) {
 		//	lx = currentData[1] - bias;
 		//}
 		//else {
 		//	lx = 0.0;
 		//}
-		if (calcFx() * calcFx() < 5) { // Do something to catch the NaN problem
-			lx = calcFx();
+		if (calcFeedback() * calcFeedback() < 5) { // Do something to catch the NaN problem
+			lx = calcFeedback();
 		}
 		//lx = calcFx();
 
@@ -304,7 +374,7 @@ Error:
 
 }
 
-void key_pressed(int key, int x, int y) {
+void key_pressed(int key, int z, int y) {
 	float fraction = 0.1f;
 	switch (key) {
 	case GLUT_KEY_UP:
@@ -388,6 +458,7 @@ void letter_pressed(unsigned char key, int x, int y) {
 int main(int argc, char** argv) {
 	printf("Press left or right arrows to move our rectangle");
 
+	
 	/*
 	** Add the closed-loop stuff here.
 	*/
@@ -397,8 +468,8 @@ int main(int argc, char** argv) {
 
 	// IMPORTANT
 	//changed Dev1 to Dev5 as the connection established. So verify what Dev is being used to update this code. DEV5 is our force torque.
-	DAQmxErrChk(DAQmxCreateAIVoltageChan(taskHandle, "Dev5/ai0:5", "", DAQmx_Val_Cfg_Default, -10.0, 10.0, DAQmx_Val_Volts, NULL));
-	DAQmxErrChk(DAQmxCfgSampClkTiming(taskHandle, "", 10000.0, DAQmx_Val_Rising, DAQmx_Val_ContSamps, 1200000));
+	DAQmxErrChk(DAQmxCreateAIVoltageChan(taskHandle, "Dev5/ai0:6", "", DAQmx_Val_Cfg_Default, -10.0, 10.0, DAQmx_Val_Volts, NULL));
+	DAQmxErrChk(DAQmxCfgSampClkTiming(taskHandle, "", 10000.0, DAQmx_Val_Rising, DAQmx_Val_ContSamps, 200100));
 	// DAQmx Start Code
 	DAQmxErrChk(DAQmxStartTask(taskHandle));
 	printf("\ngot here");
@@ -407,7 +478,7 @@ int main(int argc, char** argv) {
 	//printf("%f\n", data[it]);
 	//}
 	//printf("%f\n", data[0]);
-	DAQmxErrChk(DAQmxReadAnalogF64(taskHandle, 200000, -1.0, DAQmx_Val_GroupByChannel, data, 1200000, &read, NULL));
+	DAQmxErrChk(DAQmxReadAnalogF64(taskHandle, 200100, -1.0, DAQmx_Val_GroupByChannel, data, 1400700, &read, NULL));
 	printf("%f\n", data[0]);
 	printf("\ngot passed through analog");
 	printf("%f\n", data[199999]);
@@ -423,7 +494,7 @@ int main(int argc, char** argv) {
 	printf("\ngot passed through analog");
 	printf("%f\n", data[1199999]);
 	for (int i = 0; i < read; i++) {
-		if (queueit >= 200000) {
+		if (queueit >= 200100) {
 			queueit = 0;
 		}
 		currai0[queueit] = data[i];
@@ -432,6 +503,7 @@ int main(int argc, char** argv) {
 		currai3[queueit] = data[i + (read * 3)];
 		currai4[queueit] = data[i + (read * 4)];
 		currai5[queueit] = data[i + (read * 5)];
+		currai6[queueit] = data[i + (read * 6)];
 		queueit++;
 	}
 	bias0 = biasing(currai0);
@@ -440,6 +512,7 @@ int main(int argc, char** argv) {
 	bias3 = biasing(currai3);
 	bias4 = biasing(currai4);
 	bias5 = biasing(currai5);
+	writeShit();
 	/*
 Error:
 	if (DAQmxFailed(error))
