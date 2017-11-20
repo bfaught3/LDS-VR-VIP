@@ -37,6 +37,7 @@ float delayArr[4] = { 125.0, 250.0, 500.0, 2500.0 };
 int delay = delayArr[delayIt];
 float xp = 0, yp = 0;
 float boost = 175.0;
+float weight = 0.00183;		// This is the moth's weight
 float xAccelArr[5] = { -0.5, -0.1, 0.0, 0.1, 0.5 };
 float xAccel = xAccelArr[xAccelIt];
 // angle of rotation for the camera direction
@@ -80,10 +81,19 @@ void display() {
 
 	glColor3f(255, 255, 255); // color white for our rectangle
 
+	/*
+	if (centering) {
+		gluLookAt(0.0f, 0.0f, 0.0f,
+				  0.0f, 0.0f, -1.0f,
+				  0.0f, 1.0f, 0.0f);
+	*/
+	//} else {
 	gluLookAt(x + lx, 0.0f, z,
 			  x + lx, 0.0f, z + lz,
 			  0.0f, 1.0f, 0.0f);
-
+	//}
+	aggrlx += lx;
+	//printf("\n%d", x + lx);
 	glBegin(GL_QUADS);  //Rectangle drawing
 						// Will be using xp and yp as our changing x-position and y-position in our window
 	glVertex3f(425 + boost * xp, 0 + yp, 0);
@@ -128,7 +138,7 @@ void writeToFile() {
 	}
 
 }
-float64 calcFeedback() { // Calculates the force along the x-axis, averaged over the most recent samples.
+float64 calcFeedback() { // Calculates the force along the x-axis, averaged over the most recent samples. The units are in Newtons.
 	float64 avgai0 = 0;
 	for (int i = 0; i < read; i++) {
 		int32 j = queueit - read + i;
@@ -161,7 +171,8 @@ float64 * matrixMult(float64 ai0, float64 ai1, float64 ai2, float64 ai3, float64
 
 float64 biasing(float64 *readArray) {
 	float64 avgai = 0;
-	for (int i = 0; i < read; i++) {
+	int ignore = 0;
+	for (int i = ignore; i < read; i++) {
 		int32 j = queueit - read + i;
 		if (j < 0) {
 			avgai += readArray[j + 200100];
@@ -170,16 +181,19 @@ float64 biasing(float64 *readArray) {
 			avgai += readArray[j];
 		}
 	}
-	avgai = avgai / read;
+	avgai = avgai / (read - ignore);
 	return avgai;
 }
 /*
 ** This function allows to change the speed of the bar
 */
 void speedManager(int speed) {
+	printf("\n%f", lx);
+	//printf("\n%i",centering);
 	fps_frames++;
 	int delta_t = glutGet(GLUT_ELAPSED_TIME) - fps_start;
 	if (delta_t > 1000) {
+		//std::cout << double(delta_t) / double(fps_frames) << std::endl;
 		fps_frames = 0;
 		fps_start = glutGet(GLUT_ELAPSED_TIME);
 	}
@@ -201,7 +215,8 @@ void speedManager(int speed) {
 		}
 
 		float64 tempxp = boost * xp;
-		aggrlx += lx;
+		//aggrlx += lx;
+		//aggrlx += lx * (double(delta_t) / double(fps_frames)) / 1000;
 		xp = -sinf(((float)it / (delay / 2)) * PI);
 
 		DAQmxErrChk(DAQmxReadAnalogF64(taskHandle, -1, -1.0, DAQmx_Val_GroupByChannel, currentData, 1400700, &read, NULL));
@@ -235,10 +250,13 @@ void speedManager(int speed) {
 			lx = 0;
 			centering = 0;
 		}
-		if (calcFeedback() * calcFeedback() < 5) { // Do something to catch the NaN problem
-			lx = calcFeedback();
+		else if (calcFeedback() * calcFeedback() < 5) { // Do something to catch the NaN problem
+			//lx = calcFeedback();
+			//lx += calcFeedback()/moth's weight in kg * 1574.80315 pixels/m * read * 1.0/10000.0 * 1.0/250.0;
+			lx += (calcFeedback() / (weight * 10)) * 1574.80315 * read * (1.0 / 10000.0) * (1.0 / 250.0);
 		}
-
+		//aggrlx += lx;
+		//aggrlx += lx * (double(delta_t) / double(fps_frames)) / 1000;
 		//printf("%f\n", lx);
 		//printf("Acquired %d samples\n", (int)read);
 
@@ -324,11 +342,13 @@ void letter_pressed(unsigned char key, int x, int y) { // Does various things wh
 		glutPostRedisplay();
 		break;
 	case 99:
+		//aggrlx += lx;
 		lx = -aggrlx;
 		centering = 1;
 		glutPostRedisplay();
 		break;
 	case 67:
+		//aggrlx += lx;
 		lx = -aggrlx;
 		centering = 1;
 		glutPostRedisplay();
