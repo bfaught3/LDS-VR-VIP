@@ -37,7 +37,8 @@ float delayArr[4] = { 125.0, 250.0, 500.0, 2500.0 };
 int delay = delayArr[delayIt];
 float xp = 0, yp = 0;
 float boost = 175.0;
-float weight = 0.00183;		// This is the moth's weight
+const float weight = 0.00183;		// This is the moth's weight
+const float width = 1167.883212;
 float xAccelArr[5] = { -0.5, -0.1, 0.0, 0.1, 0.5 };
 float xAccel = xAccelArr[xAccelIt];
 // angle of rotation for the camera direction
@@ -253,7 +254,7 @@ void speedManager(int speed) {
 		else if (calcFeedback() * calcFeedback() < 5) { // Do something to catch the NaN problem
 			//lx = calcFeedback();
 			//lx += calcFeedback()/moth's weight in kg * 1574.80315 pixels/m * read * 1.0/10000.0 * 1.0/250.0;
-			lx += (calcFeedback() / (weight * 10)) * 1574.80315 * read * (1.0 / 10000.0) * (1.0 / 250.0);
+			lx += (calcFeedback() / (weight * 10)) * width * read * (1.0 / 10000.0) * (1.0 / 250.0);
 		}
 		//aggrlx += lx;
 		//aggrlx += lx * (double(delta_t) / double(fps_frames)) / 1000;
