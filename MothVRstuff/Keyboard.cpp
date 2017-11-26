@@ -25,7 +25,9 @@
 
 
 
-// Variable helpers
+/*
+ * Global variable helpers
+ **/
 static unsigned int fps_start = 0;
 static unsigned int fps_frames = 0;
 int it = 0, it1 = 0; //iterator for iterator
@@ -34,12 +36,13 @@ int xAccelIt = 3;
 int increment = 0;
 static int num = 550, num2 = 600, num3 = 800;
 float delayArr[4] = { 125.0, 250.0, 500.0, 2500.0 };
-int delay = delayArr[delayIt];
+// delay is being casted to an int from float double check if this is behavior thats wanted.
+int delay = (int)delayArr[delayIt];
 float xp = 0, yp = 0;
 float boost = 175.0;
-const float weight = 0.00183;		// This is the moth's weight
-const float width = 1167.883212;
-float xAccelArr[5] = { -0.5, -0.1, 0.0, 0.1, 0.5 };
+const float weight = 0.00183f;		// This is the moth's weight
+const float width = 1167.883212f;
+float xAccelArr[5] = { -0.5f, -0.1f, 0.0f, 0.1f, 0.5f};
 float xAccel = xAccelArr[xAccelIt];
 // angle of rotation for the camera direction
 float angle = 0.0;
@@ -51,10 +54,7 @@ float aggrlx = 0.0f;
 bool clear = 0;
 bool centering = 0;
 bool written = 0;
-
-
-
-
+// for NIDAQ data handling
 int32       error = 0;
 TaskHandle  taskHandle = 0;
 int32       read;
@@ -106,6 +106,10 @@ void display() {
 	glutSwapBuffers(); //done with current frame. Swap to being on the next.
 }
 
+/*
+ * Allows for the user to printout data obtain from NIDAQ channels.
+ * Currently will start outputting to file after trigger has been pressed.
+ **/
 void writeToFile() {
 	FILE * fileP = NULL;
 
@@ -129,7 +133,7 @@ void writeToFile() {
 			if (helperQueue >= 200100) {
 				helperQueue -= 200100;
 			}
-			fprintf(fileP, "%f, %f, %f, %f, %f, %f, %f, %f, %i\n", currxp[helperQueue], currxpcl[helperQueue], currai0[helperQueue], currai1[helperQueue], currai2[helperQueue], currai3[helperQueue], currai4[helperQueue], currai5[helperQueue], currai6[helperQueue]);
+			fprintf(fileP, "%f, %f, %f, %f, %f, %f, %f, %f, %lld\n", currxp[helperQueue], currxpcl[helperQueue], currai0[helperQueue], currai1[helperQueue], currai2[helperQueue], currai3[helperQueue], currai4[helperQueue], currai5[helperQueue], currai6[helperQueue]);
 		}
 		fclose(fileP);
 		increment++;
@@ -139,7 +143,11 @@ void writeToFile() {
 	}
 
 }
-float64 calcFeedback() { // Calculates the force along the x-axis, averaged over the most recent samples. The units are in Newtons.
+
+/*
+ *  Calculates the force along the x-axis, averaged over the most recent samples. The units are in Newtons.
+ **/
+float64 calcFeedback() {
 	float64 avgai0 = 0;
 	for (int i = 0; i < read; i++) {
 		int32 j = queueit - read + i;
@@ -155,7 +163,10 @@ float64 calcFeedback() { // Calculates the force along the x-axis, averaged over
 	return avgai0;
 }
 
-float64 * matrixMult(float64 ai0, float64 ai1, float64 ai2, float64 ai3, float64 ai4, float64 ai5) { // Takes in the voltages and converts them into the forces and torques.
+/*
+ * Allows for the conversion of voltages into force and torque.
+ **/
+const float64 * matrixMult(float64 ai0, float64 ai1, float64 ai2, float64 ai3, float64 ai4, float64 ai5) { 
 
 	float64 Fx = ((-0.000352378) * ai0) + (0.020472451 * ai1) + ((-0.02633045) * ai2) + ((-0.688977299) * ai3) + (0.000378075 * ai4) + (0.710008955 * ai5);
 	float64 Fy = ((-0.019191418) * ai0) + (0.839003543 * ai1) + ((-0.017177775) * ai2) + ((-0.37643613) * ai3) + (0.004482987 * ai4) + ((-0.434163392) * ai5);
@@ -166,7 +177,7 @@ float64 * matrixMult(float64 ai0, float64 ai1, float64 ai2, float64 ai3, float64
 
 	Tx = Fy * 94.5 + Tx * 1;
 	Ty = Fx * (-94.5) + Ty * 1;
-	float64 transformedData[6] = { Fx, Fy, Fz, Tx, Ty, Tz };
+	const static float64 transformedData[6] = { Fx, Fy, Fz, Tx, Ty, Tz };
 	return transformedData;
 }
 
@@ -186,8 +197,9 @@ float64 biasing(float64 *readArray) {
 	return avgai;
 }
 /*
-** This function allows to change the speed of the bar
-*/
+ * This function allows to change the speed of the bar
+ * @param speed - value parameter given by the glutTimerFunc
+ */
 void speedManager(int speed) {
 	printf("\n%f", lx);
 	//printf("\n%i",centering);
@@ -218,7 +230,7 @@ void speedManager(int speed) {
 		float64 tempxp = boost * xp;
 		//aggrlx += lx;
 		//aggrlx += lx * (double(delta_t) / double(fps_frames)) / 1000;
-		xp = -sinf(((float)it / (delay / 2)) * PI);
+		xp = -sinf(((float)it / (float)(delay / 2)) * (float)PI);
 
 		DAQmxErrChk(DAQmxReadAnalogF64(taskHandle, -1, -1.0, DAQmx_Val_GroupByChannel, currentData, 1400700, &read, NULL));
 		goto Skip;
@@ -234,14 +246,14 @@ void speedManager(int speed) {
 			if (queueit >= 200100) {
 				queueit = 0;
 			}
-			float64 * tempData = matrixMult((currentData[i] - bias0), (currentData[i + read] - bias1), (currentData[i + (read * 2)] - bias2), (currentData[i + (read * 3)] - bias3), (currentData[i + (read * 4)] - bias4), (currentData[i + (read * 5)] - bias5));
+			const float64 * tempData = matrixMult((currentData[i] - bias0), (currentData[i + read] - bias1), (currentData[i + (read * 2)] - bias2), (currentData[i + (read * 3)] - bias3), (currentData[i + (read * 4)] - bias4), (currentData[i + (read * 5)] - bias5));
 			currai0[queueit] = tempData[0];
 			currai1[queueit] = tempData[1];
 			currai2[queueit] = tempData[2];
 			currai3[queueit] = tempData[3];
 			currai4[queueit] = tempData[4];
 			currai5[queueit] = tempData[5];
-			currai6[queueit] = currentData[i + (read * 6)];
+			currai6[queueit] = (int64)currentData[i + (read * 6)];
 			currxp[queueit] = tempxp;
 			currxpcl[queueit] = tempxp - aggrlx;
 			queueit++;
@@ -254,7 +266,7 @@ void speedManager(int speed) {
 		else if (calcFeedback() * calcFeedback() < 5) { // Do something to catch the NaN problem
 			//lx = calcFeedback();
 			//lx += calcFeedback()/moth's weight in kg * 1574.80315 pixels/m * read * 1.0/10000.0 * 1.0/250.0;
-			lx += (calcFeedback() / (weight * 10)) * width * read * (1.0 / 10000.0) * (1.0 / 250.0);
+			lx += (float)(calcFeedback() / (weight * 10)) * width * read * (1.0f / 10000.0f) * (1.0f / 250.0f);
 		}
 		//aggrlx += lx;
 		//aggrlx += lx * (double(delta_t) / double(fps_frames)) / 1000;
@@ -272,14 +284,18 @@ void speedManager(int speed) {
 
 }
 
-void key_pressed(int key, int z, int y) { // Does various things when various keys are pressed
+/*
+ * Takes in various key inputs.
+ * Deals more with the movement of our bar.
+ **/
+void key_pressed(int key, int z, int y) {
 	float fraction = 0.1f;
 	switch (key) {
 	case GLUT_KEY_UP:
 
 		if (delayIt > 0) {
 			delayIt--;
-			delay = delayArr[delayIt];
+			delay = (int)delayArr[delayIt];
 		}
 		glutPostRedisplay(); //redraws window
 		break;
@@ -287,7 +303,7 @@ void key_pressed(int key, int z, int y) { // Does various things when various ke
 
 		if (delayIt < 3) {
 			delayIt++;
-			delay = delayArr[delayIt];
+			delay = (int)delayArr[delayIt];
 		}
 
 		glutPostRedisplay(); //redraws window
@@ -315,12 +331,12 @@ void key_pressed(int key, int z, int y) { // Does various things when various ke
 /*
  * Callback function to retrieve key value movement
  * @param key - ASCII value for key input 
- * @param x - 
- * @param y - 
+ * @param x -  n/a
+ * @param y - n/a
  */
 void letter_pressed(unsigned char key, int x, int y) { // Does various things when various letters are pressed; x and y are irrelevant.
 	switch (key) {
-	case 98:
+	case 98: //letter b
 		if (clear) {
 			yp = 0;
 			clear = false;
@@ -331,7 +347,7 @@ void letter_pressed(unsigned char key, int x, int y) { // Does various things wh
 		}
 		glutPostRedisplay();
 		break;
-	case 66:
+	case 66: //letter B
 		if (clear) {
 			yp = 0;
 			clear = false;
@@ -342,13 +358,13 @@ void letter_pressed(unsigned char key, int x, int y) { // Does various things wh
 		}
 		glutPostRedisplay();
 		break;
-	case 99:
+	case 99: // letter C
 		//aggrlx += lx;
 		lx = -aggrlx;
 		centering = 1;
 		glutPostRedisplay();
 		break;
-	case 67:
+	case 67: //letter C
 		//aggrlx += lx;
 		lx = -aggrlx;
 		centering = 1;
@@ -398,7 +414,7 @@ int main(int argc, char** argv) {
 		currai3[queueit] = data[i + (read * 3)];
 		currai4[queueit] = data[i + (read * 4)];
 		currai5[queueit] = data[i + (read * 5)];
-		currai6[queueit] = data[i + (read * 6)];
+		currai6[queueit] = (int64)data[i + (read * 6)]; //our trigger buttom. Must be floored to 0 or 1.
 		queueit++;
 	}
 	bias0 = biasing(currai0);
