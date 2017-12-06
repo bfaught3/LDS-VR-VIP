@@ -40,8 +40,9 @@ float delayArr[4] = { 125.0, 250.0, 500.0, 2500.0 };
 int delay = (int)delayArr[delayIt];
 float xp = 0, yp = 0;
 float boost = 175.0;
-const float weight = 0.00165f;		// This is the moth's weight
+const float weight = 0.00202f;		// This is the moth's weight
 const float width = 1167.883212f;
+const float threshold = 0.0025;
 float xAccelArr[5] = { -0.5f, -0.1f, 0.0f, 0.1f, 0.5f};
 float xAccel = xAccelArr[xAccelIt];
 // angle of rotation for the camera direction
@@ -74,13 +75,14 @@ float64		bias0, bias1, bias2, bias3, bias4, bias5;
 
 char        errBuff[2048] = { '\0' };
 
+bool rebias = 1;
 /*
  * OpenGL function for drawing our bar
  */
 void display() {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clears colors
 
-	glColor3f(255, 255, 255); // color white for our rectangle
+	glColor3f(255, 255, 0); // color white for our rectangle is (255, 255, 255); color yellow is (255, 255, 0)
 
 	/*
 	if (centering) {
@@ -89,7 +91,7 @@ void display() {
 				  0.0f, 1.0f, 0.0f);
 	*/
 	//} else {
-	if ((xp - (aggrlx + lx) < -325) || (xp - (aggrlx + lx) > 325)) {	// This is supposed to keep the bar on the screen
+	if (((xp - (aggrlx + lx) < -325) && (lx > 0)) || ((xp - (aggrlx + lx) > 325) && (lx < 0))) {	// This is supposed to keep the bar on the screen
 		lx = 0;
 	}
 	gluLookAt(x + lx, 0.0f, z,
@@ -100,8 +102,8 @@ void display() {
 	//printf("\n%d", x + lx);
 	glBegin(GL_QUADS);  //Rectangle drawing
 						// Will be using xp and yp as our changing x-position and y-position in our window
-	glVertex3f(475 + xp, 0 + yp, 0);
-	glVertex3f(325 + xp, 0 + yp, 0);
+	glVertex3f(475 + xp, 0 + yp, 0);	//475
+	glVertex3f(325 + xp, 0 + yp, 0);	//325
 	glVertex3f(325 + xp, 800 + yp, 0);
 	glVertex3f(475 + xp, 800 + yp, 0);
 
@@ -187,7 +189,7 @@ float64 calcFeedback() {
 
 float64 biasing(float64 *readArray) {
 	float64 avgai = 0;
-	int ignore = 100000;
+	int ignore = 0;
 	for (int i = ignore; i < read; i++) {
 		int32 j = queueit - read + i;
 		if (j < 0) {
@@ -233,7 +235,7 @@ void speedManager(int speed) {
 
 		float64 tempxp = xp;
 		//aggrlx += lx;
-		//aggrlx += lx * (double(delta_t) / double(fps_frames)) / 1000;
+		//aggrlx += lx * (double(delta_t) / double(fps_frames))c / 1000;
 		xp = -sinf(((float)it / (float)(delay / 2)) * (float)PI) * boost;
 
 		DAQmxErrChk(DAQmxReadAnalogF64(taskHandle, -1, -1.0, DAQmx_Val_GroupByChannel, currentData, 1400700, &read, NULL));
@@ -269,7 +271,7 @@ void speedManager(int speed) {
 			lx = 0;
 			centering = 0;
 		}
-		else if (calcFeedback() * calcFeedback() < 5 && abs(calcFeedback()) > 0.0025) { // Do something to catch the NaN problem
+		else if (calcFeedback() * calcFeedback() < 5 && abs(calcFeedback()) > threshold) { // Do something to catch the NaN problem
 			//lx = calcFeedback();
 			//lx += calcFeedback()/moth's weight in kg * 1574.80315 pixels/m * read * 1.0/10000.0 * 1.0/250.0;
 			lx += (float)(calcFeedback() / (weight)) * width * read * (1.0f / 10000.0f) * (1.0f / 250.0f);
@@ -377,6 +379,37 @@ void letter_pressed(unsigned char key, int x, int y) { // Does various things wh
 		it = 0;
 		centering = 1;
 		glutPostRedisplay();
+		break;
+	case 82: //letter R
+		if (rebias) {
+			bias0 += biasing(currai0);
+			bias1 += biasing(currai1);
+			bias2 += biasing(currai2);
+			bias3 += biasing(currai3);
+			bias4 += biasing(currai4);
+			bias5 += biasing(currai5);
+			rebias = 0;
+			glutPostRedisplay();
+		}
+
+		break;
+	case 114: //letter r
+		if (rebias) {
+			bias0 += biasing(currai0);
+			bias1 += biasing(currai1);
+			bias2 += biasing(currai2);
+			bias3 += biasing(currai3);
+			bias4 += biasing(currai4);
+			bias5 += biasing(currai5);
+			rebias = 0;
+			glutPostRedisplay();
+		}
+		break;
+	case 69:
+		rebias = 1;
+		break;
+	case 101:
+		rebias = 1;
 		break;
 	case 27: // ESC to exit fullscreen
 		exit(0);
