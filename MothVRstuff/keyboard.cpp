@@ -41,10 +41,15 @@ int delay = (int)delayArr[delayIt];
 float xp = 0, yp = 0;
 float boost = 175.0;
 const float weight = 0.00202f;		// This is the moth's weight
-const float width = 1167.883212f;
+//const float width = 1167.883212f;
+const float width = 1342.281879f;
 const float threshold = 0.0025;
 float xAccelArr[5] = { -0.5f, -0.1f, 0.0f, 0.1f, 0.5f};
 float xAccel = xAccelArr[xAccelIt];
+int barwidthIt = 1;
+//float barwidthArr[3] = { 145.8f / 2, 221.5f / 2, 300.9f / 2 };
+float barwidthArr[3] = { 72, 110, 150 };
+float barwidth = barwidthArr[barwidthIt];
 // angle of rotation for the camera direction
 float angle = 0.0;
 // actual vector representing the camera's direction
@@ -82,7 +87,7 @@ bool rebias = 1;
 void display() {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clears colors
 
-	glColor3f(255, 255, 0); // color white for our rectangle is (255, 255, 255); color yellow is (255, 255, 0)
+	glColor3f(255, 255, 255); // color white for our rectangle is (255, 255, 255); color yellow is (255, 255, 0)
 
 	/*
 	if (centering) {
@@ -102,10 +107,10 @@ void display() {
 	//printf("\n%d", x + lx);
 	glBegin(GL_QUADS);  //Rectangle drawing
 						// Will be using xp and yp as our changing x-position and y-position in our window
-	glVertex3f(475 + xp, 0 + yp, 0);	//475
-	glVertex3f(325 + xp, 0 + yp, 0);	//325
-	glVertex3f(325 + xp, 800 + yp, 0);
-	glVertex3f(475 + xp, 800 + yp, 0);
+	glVertex3f(400 + barwidth + xp, 0 + yp, 0);	//475
+	glVertex3f(400 - barwidth + xp, 0 + yp, 0);	//325
+	glVertex3f(400 - barwidth + xp, 800 + yp, 0);
+	glVertex3f(400 + barwidth + xp, 800 + yp, 0);
 
 	glEnd();
 	glutSwapBuffers(); //done with current frame. Swap to being on the next.
@@ -413,6 +418,20 @@ void letter_pressed(unsigned char key, int x, int y) { // Does various things wh
 		break;
 	case 27: // ESC to exit fullscreen
 		exit(0);
+		break;
+	case 45: //- will shrink bar
+		if (barwidthIt > 0) {
+			barwidthIt--;
+			barwidth = barwidthArr[barwidthIt];
+		}
+		glutPostRedisplay();
+		break;
+	case 61: //= will enlarge bar
+		if (barwidthIt < 2) {
+			barwidthIt++;
+			barwidth = barwidthArr[barwidthIt];
+		}
+		glutPostRedisplay();
 		break;
 	}
 }
