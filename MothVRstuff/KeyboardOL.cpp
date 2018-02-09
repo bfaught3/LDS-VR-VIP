@@ -24,7 +24,7 @@ int it = 0, it1 = 0, it2 = 0; //iterator for iterator
 int mod = 1;
 //int delayArr[4] = { 5, 10, 20, 100 };
 float delayArr[4] = { 125.0, 250.0, 500.0, 2500.0 };
-int delayIt = 0;
+int delayIt = 3;
 int delay = delayArr[delayIt];
 //double boost = 6.4;
 float boost = 175.0;
@@ -36,6 +36,11 @@ static int num = 550, num2 = 600, num3 = 800;
 float xAccelArr[5] = { -0.5, -0.1, 0.0, 0.1, 0.5 };
 int xAccelIt = 3;
 float xAccel = xAccelArr[xAccelIt];
+int barwidthIt = 1;
+//float barwidthArr[3] = { 145.8f / 2, 221.5f / 2, 300.9f / 2 };
+float barwidthArr[3] = { 72, 110, 150 };
+float barwidth = barwidthArr[barwidthIt];
+int bars[5] = { -8, -4, 0, 4, 8 };
 
 // angle of rotation for the camera direction
 float angle = 0.0;
@@ -70,20 +75,55 @@ void display() {
 		x + lx, 0.0f, z + lz,
 		0.0f, 1.0f, 0.0f);
 
+	int barTemp = bars[0];
 	glBegin(GL_QUADS);  //Rectangle drawing
 						// Will be using xp and yp as our changing x-position and y-position in our window
-						//glVertex3f(400 + boost * xp, 0 + yp, 0);
-						//glVertex3f(550 + boost * xp, 0 + yp, 0);
-						//glVertex3f(550 + boost * xp, 800 + yp, 0);
-						//glVertex3f(600 + boost * xp, 800 + yp, 0);
-						//glVertex3f(600 +  xp, 0 + yp, 0);
-						//glVertex3f(550 +  xp, 0 + yp, 0);
-						//glVertex3f(550 +  xp, 800 + yp, 0);
-						//glVertex3f(600 +  xp, 800 + yp, 0);
-	glVertex3f(425 + boost * xp, 0 + yp, 0);
-	glVertex3f(375 + boost * xp, 0 + yp, 0);
-	glVertex3f(375 + boost * xp, 800 + yp, 0);
-	glVertex3f(425 + boost * xp, 800 + yp, 0);
+	glVertex3f(400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0);	//475
+	glVertex3f(400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0);	//325
+	glVertex3f(400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0);
+	glVertex3f(400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0);
+
+	glEnd();
+
+	barTemp = bars[1];
+	glBegin(GL_QUADS);  //Rectangle drawing
+						// Will be using xp and yp as our changing x-position and y-position in our window
+	glVertex3f(400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0);	//475
+	glVertex3f(400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0);	//325
+	glVertex3f(400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0);
+	glVertex3f(400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0);
+
+	glEnd();
+
+	barTemp = bars[2];
+	glBegin(GL_QUADS);  //Rectangle drawing
+						// Will be using xp and yp as our changing x-position and y-position in our window
+	glVertex3f(400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0);	//475
+	glVertex3f(400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0);	//325
+	glVertex3f(400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0);
+	glVertex3f(400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0);
+
+	glEnd();
+
+	barTemp = bars[3];
+	glBegin(GL_QUADS);  //Rectangle drawing
+						// Will be using xp and yp as our changing x-position and y-position in our window
+	glVertex3f(400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0);	//475
+	glVertex3f(400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0);	//325
+	glVertex3f(400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0);
+	glVertex3f(400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0);
+
+	glEnd();
+
+	barTemp = bars[4];
+	glBegin(GL_QUADS);  //Rectangle drawing
+						// Will be using xp and yp as our changing x-position and y-position in our window
+	glVertex3f(400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0);	//475
+	glVertex3f(400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0);	//325
+	glVertex3f(400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0);
+	glVertex3f(400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0);
+
+	glEnd();
 	//printf("%f\n", lx);
 
 	glEnd();
@@ -176,7 +216,9 @@ void speedManager(int speed) {
 		}
 		*/
 		//xp = xp - sinf(((float)it / (1256.0 / boost)) * PI);
-		xp = -sinf(((float)it / (delay / 2)) * PI);
+		//xp = -sinf(((float)it / (delay / 2)) * PI);
+		xp = -sinf(((float)it / (float)(delay / 2)) * (float)PI) * boost;
+
 		//xp = xp - sinf(((float)it / (400.0)) * PI);
 		//if (xp*xp < 0.1)
 		//printf("%f", 550 + boost * xp);
@@ -267,6 +309,9 @@ void letter_pressed(unsigned char key, int x, int y) {
 		}
 		glutPostRedisplay();
 		break;
+	case 27: // ESC to exit fullscreen
+		exit(0);
+		break;
 		//Not implemented yet
 	case 114:
 		printf("We are entering our switch case\n");
@@ -282,6 +327,21 @@ void letter_pressed(unsigned char key, int x, int y) {
 		}
 		glEnd();
 		glPopMatrix();
+		break;
+	case 45: //- will shrink bar
+		if (barwidthIt > 0) {
+			barwidthIt--;
+			barwidth = barwidthArr[barwidthIt];
+		}
+		glutPostRedisplay();
+		break;
+	case 61: //= will enlarge bar
+		if (barwidthIt < 2) {
+			barwidthIt++;
+			barwidth = barwidthArr[barwidthIt];
+		}
+		glutPostRedisplay();
+		break;
 	}
 }
 
@@ -298,6 +358,7 @@ int main(int argc, char** argv) {
 
 
 	fps_start = glutGet(GLUT_ELAPSED_TIME);
+	glutFullScreen(); //This makes shit fullscreen
 	//glutTimerFunc(1000, speedManager, 0);
 	glutDisplayFunc(display);
 	//printf("finished display\n");
