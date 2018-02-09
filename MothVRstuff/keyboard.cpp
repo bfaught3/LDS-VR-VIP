@@ -22,6 +22,8 @@
 #include <stdio.h>
 #include <NIDAQmx.h>
 #include <time.h>
+//#include <string.h>
+#include <GL/glui.h>
 
 
 
@@ -50,6 +52,9 @@ int barwidthIt = 1;
 //float barwidthArr[3] = { 145.8f / 2, 221.5f / 2, 300.9f / 2 };
 float barwidthArr[3] = { 72, 110, 150 };
 float barwidth = barwidthArr[barwidthIt];
+int bars[5] = { -8, -4, 0, 4, 8 };	//These should (increment or decrement) by 20 when the bars go too far off the screen.
+bool isRight[5] = { false, false, false, false, true }; //This keeps track of the rightmost bar
+bool isLeft[5] = { true, false, false, false, false }; //This keeps track of the leftmost bar
 // angle of rotation for the camera direction
 float angle = 0.0;
 // actual vector representing the camera's direction
@@ -96,23 +101,83 @@ void display() {
 				  0.0f, 1.0f, 0.0f);
 	*/
 	//} else {
-	if (((xp - (aggrlx + lx) < -325) && (lx > 0)) || ((xp - (aggrlx + lx) > 325) && (lx < 0))) {	// This is supposed to keep the bar on the screen
-		lx = 0;
-	}
+	//if (((xp - (aggrlx + lx) < -325) && (lx > 0)) || ((xp - (aggrlx + lx) > 325) && (lx < 0))) {	// This is supposed to keep the bar on the screen
+	//	lx = 0;
+	//}
 	gluLookAt(x + lx, 0.0f, z,
 			  x + lx, 0.0f, z + lz,
 			  0.0f, 1.0f, 0.0f);
 	//}
 	aggrlx += lx;
 	//printf("\n%d", x + lx);
+
+	for (int i = 0; i < 5; i++) {
+		if (isLeft[i] && (400 + (bars[i] - 1) * barwidth + xp) >= aggrlx) { //When the leftmost edge of the leftmost bar is within the screen, freak out (aka send the rightmost bar to the left)
+			bars[(i + 4) % 5] -= 20;
+			isLeft[(i + 4) % 5] = true;
+			isLeft[i] = false;
+			isRight[(i + 4) % 5] = false;
+			isRight[(i + 3) % 5] = true;
+		}
+		else if (isRight[i] && (400 + (bars[i] + 1) * barwidth + xp) <= aggrlx + 800) {
+			bars[(i + 1) % 5] += 20;
+			isRight[(i + 1) % 5] = true;
+			isRight[i] = false;
+			isLeft[(i + 1) % 5] = false;
+			isLeft[(i + 2) % 5] = true;
+		}
+	}
+
+	int barTemp = bars[0];
 	glBegin(GL_QUADS);  //Rectangle drawing
 						// Will be using xp and yp as our changing x-position and y-position in our window
-	glVertex3f(400 + barwidth + xp, 0 + yp, 0);	//475
-	glVertex3f(400 - barwidth + xp, 0 + yp, 0);	//325
-	glVertex3f(400 - barwidth + xp, 800 + yp, 0);
-	glVertex3f(400 + barwidth + xp, 800 + yp, 0);
+	glVertex3f(400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0);	//475
+	glVertex3f(400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0);	//325
+	glVertex3f(400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0);
+	glVertex3f(400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0);
 
 	glEnd();
+
+	barTemp = bars[1];
+	glBegin(GL_QUADS);  //Rectangle drawing
+						// Will be using xp and yp as our changing x-position and y-position in our window
+	glVertex3f(400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0);	//475
+	glVertex3f(400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0);	//325
+	glVertex3f(400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0);
+	glVertex3f(400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0);
+
+	glEnd();
+
+	barTemp = bars[2];
+	glBegin(GL_QUADS);  //Rectangle drawing
+						// Will be using xp and yp as our changing x-position and y-position in our window
+	glVertex3f(400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0);	//475
+	glVertex3f(400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0);	//325
+	glVertex3f(400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0);
+	glVertex3f(400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0);
+
+	glEnd();
+
+	barTemp = bars[3];
+	glBegin(GL_QUADS);  //Rectangle drawing
+						// Will be using xp and yp as our changing x-position and y-position in our window
+	glVertex3f(400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0);	//475
+	glVertex3f(400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0);	//325
+	glVertex3f(400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0);
+	glVertex3f(400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0);
+
+	glEnd();
+
+	barTemp = bars[4];
+	glBegin(GL_QUADS);  //Rectangle drawing
+						// Will be using xp and yp as our changing x-position and y-position in our window
+	glVertex3f(400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0);	//475
+	glVertex3f(400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0);	//325
+	glVertex3f(400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0);
+	glVertex3f(400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0);
+
+	glEnd();
+
 	glutSwapBuffers(); //done with current frame. Swap to being on the next.
 }
 
@@ -500,7 +565,7 @@ int main(int argc, char** argv) {
 
 
 	fps_start = glutGet(GLUT_ELAPSED_TIME);
-	glutFullScreen();
+	glutFullScreen(); //This makes shit fullscreen
 	glutDisplayFunc(display);
 	//printf("finished display\n");
 	glutTimerFunc(0, speedManager, 0);
