@@ -58,7 +58,7 @@ int it = 0, it1 = 0, it2 = 0; //iterator for iterator
 int mod = 1;
 //int delayArr[4] = { 5, 10, 20, 100 };
 //float delayArr[4] = { 125.0, 250.0, 500.0, 2500.0 };
-float delayArr[4] = { 60.0, 120.0, 240.0, 1200.0 };
+float delayArr[4] = { 60.0, 120.0, 240.0, 1200.0 }; //120 frames per second
 int delayIt = 3;
 int delay = delayArr[delayIt];
 //double boost = 6.4;
@@ -107,6 +107,8 @@ int32		queueit = 0;
 float64		bias0, bias1, bias2, bias3, bias4, bias5;
 char        errBuff[2048] = { '\0' };
 bool written = 0;
+bool drifting = 0; //False if sinusoidal, true if drifting
+float driftVel = 0; //Velocity of the drift in pixels/sec
 
 GLfloat vertices0[] = { 400 + (-8 + 1) * barwidth + xp, 800 + yp, 0, 0, 0, 1, 1, 1, 1,              // v0 (front)
 400 + (-8 - 1) * barwidth + xp, 800 + yp, 0, 0, 0, 1, 1, 1, 1,              // v1
@@ -1770,7 +1772,12 @@ void speedManager() {
 		//xp = -sinf(((float)it / (delay / 2)) * PI);
 		float64 tempxp = xp;
 
-		xp = -sinf(((float)it / (float)(delay / 2)) * (float)PI) * boost;
+		if (drifting) {
+			xp += driftVel;
+		}
+		else {
+			xp = -sinf(((float)it / (float)(delay / 2)) * (float)PI) * boost;
+		}
 		//lx = -((2 * (float)PI) / (float)delay) * cosf((2 * (float)PI * (float)it) / (float)delay) * boost;
 
 		//xp = xp - sinf(((float)it / (400.0)) * PI);
@@ -1839,6 +1846,7 @@ void key_pressed(int key, int x, int y) {
 			delayIt--;
 			delay = delayArr[delayIt];
 		}
+		drifting = 0;
 		glutPostRedisplay(); //redraws window
 		break;
 	case GLUT_KEY_DOWN:
@@ -1847,7 +1855,7 @@ void key_pressed(int key, int x, int y) {
 			delayIt++;
 			delay = delayArr[delayIt];
 		}
-
+		drifting = 0;
 		glutPostRedisplay(); //redraws window
 		break;
 	case GLUT_KEY_LEFT:
@@ -1872,6 +1880,7 @@ void key_pressed(int key, int x, int y) {
 void letter_pressed(unsigned char key, int x, int y) {
 	float degree;
 	float frequency;
+	float driftDeg; //drift in degrees/sec
 	switch (key) {
 	case 98:
 		if (clear) {
@@ -1934,14 +1943,34 @@ void letter_pressed(unsigned char key, int x, int y) {
 		bars[2] = 0;
 		bars[3] = 0;
 		bars[4] = 0;
+		bars[5] = 0;
+		bars[6] = 0;
+		bars[7] = 0;
+		bars[8] = 0;
+		bars[9] = 0;
+		bars[10] = 0;
+		bars[11] = 0;
+		bars[12] = 0;
+		bars[13] = 0;
+		bars[14] = 0;
 		glutPostRedisplay();
 		break;
 	case 50: //2 will make stimulus 5-bar grate
-		bars[0] = -8;
-		bars[1] = -4;
-		bars[2] = 0;
-		bars[3] = 4;
-		bars[4] = 8;
+		bars[0] = -28;
+		bars[1] = -24;
+		bars[2] = -20;
+		bars[3] = -16;
+		bars[4] = -12;
+		bars[5] = -8;
+		bars[6] = -4;
+		bars[7] = 0;
+		bars[8] = 4;
+		bars[9] = 8;
+		bars[10] = 12;
+		bars[11] = 16;
+		bars[12] = 20;
+		bars[13] = 24;
+		bars[14] = 28;
 		glutPostRedisplay();
 		break;
 	case 86: //V will request viewing angle
@@ -1962,11 +1991,29 @@ void letter_pressed(unsigned char key, int x, int y) {
 		printf("\nInput oscillation frequency in Hz: ");
 		scanf("%f", &frequency);
 		delay = 120.0 / frequency;
+		drifting = 0;
+		glutPostRedisplay();
 		break;
 	case 102: //f will request frequency
 		printf("\nInput oscillation frequency in Hz: ");
 		scanf("%f", &frequency);
 		delay = 120.0 / frequency;
+		drifting = 0;
+		glutPostRedisplay();
+		break;
+	case 68: //D will request driftDeg
+		printf("\nInput drift velocity in degrees/sec: ");
+		scanf("%f", &driftDeg);
+		driftVel = 2.0*PI*0.307975*(driftDeg / 360.0)*1342.281879*(1.0/120.0);
+		drifting = 1;
+		glutPostRedisplay();
+		break;
+	case 100: //d will request driftDeg
+		printf("\nInput drift velocity in degrees/sec: ");
+		scanf("%f", &driftDeg);
+		driftVel = 2.0*PI*0.307975*(driftDeg / 360.0)*1342.281879*(1.0/120.0);
+		drifting = 1;
+		glutPostRedisplay();
 		break;
 	}
 }

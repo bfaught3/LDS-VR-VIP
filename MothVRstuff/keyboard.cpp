@@ -95,6 +95,8 @@ float64		bias0, bias1, bias2, bias3, bias4, bias5;
 char        errBuff[2048] = { '\0' };
 
 bool rebias = 1;
+bool drifting = 0; //False if sinusoidal motion is active, true if velocity drift is active.
+float driftVel = 0;
 
 GLfloat vertices0[] = { 400 + (-8 + 1) * barwidth + xp, 800 + yp, 0, 0, 0, 1, 1, 1, 1,              // v0 (front)
 400 + (-8 - 1) * barwidth + xp, 800 + yp, 0, 0, 0, 1, 1, 1, 1,              // v1
@@ -916,7 +918,7 @@ void display() {
 			isLeft[i] = false;
 			isRight[(i + 14) % 15] = false;
 			isRight[(i + 13) % 15] = true;
-			printf("Moving rightmost bar to the left\n");
+			//printf("Moving rightmost bar to the left\n");
 		}
 		else if (isRight[i] && (400 + (bars[i] + 1) * barwidth + xp) <= aggrlx + 800) {
 			bars[(i + 1) % 15] += 60;
@@ -924,7 +926,7 @@ void display() {
 			isRight[i] = false;
 			isLeft[(i + 1) % 15] = false;
 			isLeft[(i + 2) % 15] = true;
-			printf("Moving leftmost bar to the right\n");
+			//printf("Moving leftmost bar to the right\n");
 		}
 	}
 
@@ -1767,7 +1769,12 @@ void speedManager(void) {
 		float64 tempxp = xp;
 		//aggrlx += lx;
 		//aggrlx += lx * (double(delta_t) / double(fps_frames))c / 1000;
-		xp = -sinf(((float)it / (float)(delay / 2)) * (float)PI) * boost;
+		if (drifting) {
+			xp += driftVel;
+		}
+		else {
+			xp = -sinf(((float)it / (float)(delay / 2)) * (float)PI) * boost;
+		}
 
 		DAQmxErrChk(DAQmxReadAnalogF64(taskHandle, -1, -1.0, DAQmx_Val_GroupByChannel, currentData, 1400700, &read, NULL));
 		goto Skip;
@@ -1829,24 +1836,25 @@ void speedManager(void) {
  * Takes in various key inputs.
  * Deals more with the movement of our bar.
  **/
-void key_pressed(int key, int z, int y) {
+void key_pressed(int key, int x, int y) {
 	float fraction = 0.1f;
 	switch (key) {
 	case GLUT_KEY_UP:
 
 		if (delayIt > 0) {
 			delayIt--;
-			delay = (int)delayArr[delayIt];
+			delay = delayArr[delayIt];
 		}
+		drifting = 0;
 		glutPostRedisplay(); //redraws window
 		break;
 	case GLUT_KEY_DOWN:
 
 		if (delayIt < 3) {
 			delayIt++;
-			delay = (int)delayArr[delayIt];
+			delay = delayArr[delayIt];
 		}
-
+		drifting = 0;
 		glutPostRedisplay(); //redraws window
 		break;
 	case GLUT_KEY_LEFT:
@@ -1875,11 +1883,12 @@ void key_pressed(int key, int z, int y) {
  * @param x -  n/a
  * @param y - n/a
  */
-void letter_pressed(unsigned char key, int x, int y) { // Does various things when various letters are pressed; x and y are irrelevant.
+void letter_pressed(unsigned char key, int x, int y) {
 	float degree;
 	float frequency;
+	float driftDeg; //drift in degrees/sec
 	switch (key) {
-	case 98: //letter b
+	case 98:
 		if (clear) {
 			yp = 0;
 			clear = false;
@@ -1890,7 +1899,7 @@ void letter_pressed(unsigned char key, int x, int y) { // Does various things wh
 		}
 		glutPostRedisplay();
 		break;
-	case 66: //letter B
+	case 66:
 		if (clear) {
 			yp = 0;
 			clear = false;
@@ -1900,54 +1909,25 @@ void letter_pressed(unsigned char key, int x, int y) { // Does various things wh
 			clear = true;
 		}
 		glutPostRedisplay();
-		break;
-	case 99: // letter C
-		//aggrlx += lx;
-		lx = -aggrlx;
-		it = 0;
-		centering = 1; //iffy
-		glutPostRedisplay();
-		break;
-	case 67: //letter C
-		//aggrlx += lx;
-		lx = -aggrlx;
-		it = 0;
-		centering = 1;
-		glutPostRedisplay();
-		break;
-	case 82: //letter R
-		if (rebias) {
-			bias0 += biasing(currai0);
-			bias1 += biasing(currai1);
-			bias2 += biasing(currai2);
-			bias3 += biasing(currai3);
-			bias4 += biasing(currai4);
-			bias5 += biasing(currai5);
-			rebias = 0;
-			glutPostRedisplay();
-		}
-
-		break;
-	case 114: //letter r
-		if (rebias) {
-			bias0 += biasing(currai0);
-			bias1 += biasing(currai1);
-			bias2 += biasing(currai2);
-			bias3 += biasing(currai3);
-			bias4 += biasing(currai4);
-			bias5 += biasing(currai5);
-			rebias = 0;
-			glutPostRedisplay();
-		}
-		break;
-	case 69:
-		rebias = 1;
-		break;
-	case 101:
-		rebias = 1;
 		break;
 	case 27: // ESC to exit fullscreen
 		exit(0);
+		break;
+		//Not implemented yet
+	case 114:
+		printf("We are entering our switch case\n");
+		glPushMatrix();
+		glTranslatef(200, 300, 0);
+		glRotatef(90, 0, 0, 1);
+		glBegin(GL_QUADS);
+		{
+			glVertex2f(-num / 2, -num2 / 2);
+			glVertex2f(-num2 / 2, -num2 / 2);
+			glVertex2f(num2 / 2, num3 / 2);
+			glVertex2f(num / 2, num3 / 2);
+		}
+		glEnd();
+		glPopMatrix();
 		break;
 	case 45: //- will shrink bar
 		if (barwidthIt > 0) {
@@ -1969,14 +1949,34 @@ void letter_pressed(unsigned char key, int x, int y) { // Does various things wh
 		bars[2] = 0;
 		bars[3] = 0;
 		bars[4] = 0;
+		bars[5] = 0;
+		bars[6] = 0;
+		bars[7] = 0;
+		bars[8] = 0;
+		bars[9] = 0;
+		bars[10] = 0;
+		bars[11] = 0;
+		bars[12] = 0;
+		bars[13] = 0;
+		bars[14] = 0;
 		glutPostRedisplay();
 		break;
 	case 50: //2 will make stimulus 5-bar grate
-		bars[0] = -8;
-		bars[1] = -4;
-		bars[2] = 0;
-		bars[3] = 4;
-		bars[4] = 8;
+		bars[0] = -28;
+		bars[1] = -24;
+		bars[2] = -20;
+		bars[3] = -16;
+		bars[4] = -12;
+		bars[5] = -8;
+		bars[6] = -4;
+		bars[7] = 0;
+		bars[8] = 4;
+		bars[9] = 8;
+		bars[10] = 12;
+		bars[11] = 16;
+		bars[12] = 20;
+		bars[13] = 24;
+		bars[14] = 28;
 		glutPostRedisplay();
 		break;
 	case 86: //V will request viewing angle
@@ -1997,11 +1997,29 @@ void letter_pressed(unsigned char key, int x, int y) { // Does various things wh
 		printf("\nInput oscillation frequency in Hz: ");
 		scanf("%f", &frequency);
 		delay = 120.0 / frequency;
+		drifting = 0;
+		glutPostRedisplay();
 		break;
 	case 102: //f will request frequency
 		printf("\nInput oscillation frequency in Hz: ");
 		scanf("%f", &frequency);
 		delay = 120.0 / frequency;
+		drifting = 0;
+		glutPostRedisplay();
+		break;
+	case 68: //D will request driftDeg
+		printf("\nInput drift velocity in degrees/sec: ");
+		scanf("%f", &driftDeg);
+		driftVel = 2.0*PI*0.307975*(driftDeg / 360.0)*1342.281879*(1.0 / 120.0);
+		drifting = 1;
+		glutPostRedisplay();
+		break;
+	case 100: //d will request driftDeg
+		printf("\nInput drift velocity in degrees/sec: ");
+		scanf("%f", &driftDeg);
+		driftVel = 2.0*PI*0.307975*(driftDeg / 360.0)*1342.281879*(1.0 / 120.0);
+		drifting = 1;
+		glutPostRedisplay();
 		break;
 	}
 }
