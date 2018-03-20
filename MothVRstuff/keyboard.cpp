@@ -101,7 +101,7 @@ float driftVel = 0;
 bool closedLoop = 0;
 bool horizontal = 0; //True if stimuli are horizontal bars.
 bool spinning = 0; //True if stimuli are spinning spokes.
-float viewingAngle = 5; //This viewing angle will be used for the spokes.
+float viewingAngle = 10; //This viewing angle will be used for the spokes.
 
 GLfloat vertices0[] = { 400 + (-8 + 1) * barwidth + xp, 800 + yp, 0, 0, 0, 1, 1, 1, 1,              // v0 (front)
 400 + (-8 - 1) * barwidth + xp, 800 + yp, 0, 0, 0, 1, 1, 1, 1,              // v1
@@ -1062,875 +1062,1440 @@ void display() {
 
 	
 	if (spinning) {
-		int barTemp = 0.0;
-
+		gluLookAt(x, 0.0f, z,
+			x, 0.0f, z + lz,
+			0.0f, 1.0f, 0.0f);
+		float barTemp = 0.0;
+		
 		GLfloat verticesTemp0[216] = { 400, 400 + yp, 0, 0, 0, 1, 1, 1, 1,              // v0 (front)
-			400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0, 0, 0, 1, 1, 1, 1,              // v1
-			400 + 1000 * cosf((barTemp*viewingAngle - viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 360.0), 400 + 1000 * sinf((barTemp*viewingAngle - viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 360.0) + yp, 0, 0, 0, 1, 1, 1, 1,              // v2
-			400 + 1000 * cosf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0/boost))*PI/360.0), 400 + 1000 * sinf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 360.0) + yp, 0, 0, 0, 1, 1, 1, 1,              // v3
+			400, 400 + yp, 0, 0, 0, 1, 1, 1, 1,              // v1
+			400 + 1000 * cosf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, 0, 0, 0, 1, 1, 1, 1,              // v2
+			400 + 1000 * cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, 0, 0, 0, 1, 1, 1, 1,              // v3
 
-			400, 400 + yp, 0, 1, 0, 0, 1, 1, 1,              // v0 (right)
-			400 + 1000 * cosf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 360.0), 400 + 1000 * sinf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 360.0) + yp, 0, 1, 0, 0, 1, 1, 1,              // v3
-			400 + 1000 * cosf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 360.0), 400 + 1000 * sinf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 360.0) + yp, -10, 1, 0, 0, 1, 1, 1,              // v4
-			400, 400 + yp, -10, 1, 0, 0, 1, 1, 1,              // v5
+			400, 400 + yp, 0, cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v0 (right)
+			400 + 1000 * cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, 0,  cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v3
+			400 + 1000 * cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, -10, cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v4
+			400, 400 + yp, -10, cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v5
 
 			400, 400 + yp, 0, 0, 1, 0, 1, 1, 1,              // v0 (top)
 			400, 400 + yp, -10, 0, 1, 0, 1, 1, 1,              // v5
 			400, 400 + yp, -10, 0, 1, 0, 1, 1, 1,              // v6
 			400, 400 + yp, 0, 0, 1, 0, 1, 1, 1,              // v1
 
-			400, 400 + yp, 0, -1, 0, 0, 1, 1, 1,              // v1 (left)
-			400, 400 + yp, -10, -1, 0, 0, 1, 1, 1,              // v6
-			400 + 1000 * cosf((barTemp*viewingAngle - viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 360.0), 400 + 1000 * sinf((barTemp*viewingAngle - viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 360.0) + yp, -10, -1, 0, 0, 1, 1, 1,              // v7
-			400 + 1000 * cosf((barTemp*viewingAngle - viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 360.0), 400 + 1000 * sinf((barTemp*viewingAngle - viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 360.0) + yp, 0, -1, 0, 0, 1, 1, 1,              // v2
+			400, 400 + yp, 0, cosf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v1 (left)
+			400, 400 + yp, -10, cosf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v6
+			400 + 1000 * cosf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, -10, cosf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v7
+			400 + 1000 * cosf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, 0, cosf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v2
 
-			400 + 1000 * cosf((barTemp*viewingAngle - viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 360.0), 400 + 1000 * sinf((barTemp*viewingAngle - viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 360.0) + yp, -10, 0, -1, 0, 1, 1, 1,              // v7 (bottom)
-			400 + 1000 * cosf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 360.0), 400 + 1000 * sinf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 360.0) + yp, -10, 0, -1, 0, 1, 1, 1,              // v4
-			400 + 1000 * cosf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 360.0), 400 + 1000 * sinf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 360.0) + yp, 0, 0, -1, 0, 1, 1, 1,              // v3
-			400 + 1000 * cosf((barTemp*viewingAngle - viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 360.0), 400 + 1000 * sinf((barTemp*viewingAngle - viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 360.0) + yp, 0, 0, -1, 0, 1, 1, 1,              // v2
+			400 + 1000 * cosf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, -10, cosf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), 0, 1, 1, 1,              // v7 (bottom)
+			400 + 1000 * cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, -10, cosf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), 0, 1, 1, 1,              // v4
+			400 + 1000 * cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, 0, cosf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), 0, 1, 1, 1,              // v3
+			400 + 1000 * cosf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, 0, cosf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), 0, 1, 1, 1,              // v2
 
-			400 + 1000 * cosf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 360.0), 400 + 1000 * sinf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 360.0) + yp, -10, 0, 0, -1, 1, 1, 1,              // v4 (back)
-			400 + 1000 * cosf((barTemp*viewingAngle - viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 360.0), 400 + 1000 * sinf((barTemp*viewingAngle - viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 360.0) + yp, -10, 0, 0, -1, 1, 1, 1,              // v7
+			400 + 1000 * cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, -10, 0, 0, -1, 1, 1, 1,              // v4 (back)
+			400 + 1000 * cosf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, -10, 0, 0, -1, 1, 1, 1,              // v7
 			400, 400 + yp, -10, 0, 0, -1, 1, 1, 1,              // v6
 			400, 400 + yp, -10, 0, 0, -1, 1, 1, 1 };            // v5
 		memcpy(vertices0, verticesTemp0, sizeof(verticesTemp0));
-	}
-	if (horizontal) {
-		gluLookAt(x + lx, 0.0f, z,
-			x + lx, 0.0f, z + lz,
-			1.0f, 0.0f, 0.0f);
+		
+		barTemp = 2.0;
+
+		GLfloat verticesTemp1[216] = { 400, 400 + yp, 0, 0, 0, 1, 1, 1, 1,              // v0 (front)
+			400, 400 + yp, 0, 0, 0, 1, 1, 1, 1,              // v1
+			400 + 1000 * cosf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, 0, 0, 0, 1, 1, 1, 1,              // v2
+			400 + 1000 * cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, 0, 0, 0, 1, 1, 1, 1,              // v3
+
+			400, 400 + yp, 0, cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v0 (right)
+			400 + 1000 * cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, 0,  cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v3
+			400 + 1000 * cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, -10, cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v4
+			400, 400 + yp, -10, cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle  + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v5
+
+			400, 400 + yp, 0, 0, 1, 0, 1, 1, 1,              // v0 (top)
+			400, 400 + yp, -10, 0, 1, 0, 1, 1, 1,              // v5
+			400, 400 + yp, -10, 0, 1, 0, 1, 1, 1,              // v6
+			400, 400 + yp, 0, 0, 1, 0, 1, 1, 1,              // v1
+
+			400, 400 + yp, 0, cosf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v1 (left)
+			400, 400 + yp, -10, cosf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v6
+			400 + 1000 * cosf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, -10, cosf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v7
+			400 + 1000 * cosf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, 0, cosf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v2
+
+			400 + 1000 * cosf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, -10, cosf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), 0, 1, 1, 1,              // v7 (bottom)
+			400 + 1000 * cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, -10, cosf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), 0, 1, 1, 1,              // v4
+			400 + 1000 * cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, 0, cosf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), 0, 1, 1, 1,              // v3
+			400 + 1000 * cosf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, 0, cosf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), 0, 1, 1, 1,              // v2
+
+			400 + 1000 * cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, -10, 0, 0, -1, 1, 1, 1,              // v4 (back)
+			400 + 1000 * cosf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, -10, 0, 0, -1, 1, 1, 1,              // v7
+			400, 400 + yp, -10, 0, 0, -1, 1, 1, 1,              // v6
+			400, 400 + yp, -10, 0, 0, -1, 1, 1, 1 };            // v5
+		memcpy(vertices1, verticesTemp1, sizeof(verticesTemp1));
+		
+		barTemp = 4.0;
+
+		GLfloat verticesTemp2[216] = { 400, 400 + yp, 0, 0, 0, 1, 1, 1, 1,              // v0 (front)
+			400, 400 + yp, 0, 0, 0, 1, 1, 1, 1,              // v1
+			400 + 1000 * cosf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, 0, 0, 0, 1, 1, 1, 1,              // v2
+			400 + 1000 * cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, 0, 0, 0, 1, 1, 1, 1,              // v3
+
+			400, 400 + yp, 0, cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v0 (right)
+			400 + 1000 * cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, 0,  cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v3
+			400 + 1000 * cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, -10, cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v4
+			400, 400 + yp, -10, cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v5
+
+			400, 400 + yp, 0, 0, 1, 0, 1, 1, 1,              // v0 (top)
+			400, 400 + yp, -10, 0, 1, 0, 1, 1, 1,              // v5
+			400, 400 + yp, -10, 0, 1, 0, 1, 1, 1,              // v6
+			400, 400 + yp, 0, 0, 1, 0, 1, 1, 1,              // v1
+
+			400, 400 + yp, 0, cosf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v1 (left)
+			400, 400 + yp, -10, cosf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v6
+			400 + 1000 * cosf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, -10, cosf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v7
+			400 + 1000 * cosf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, 0, cosf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v2
+
+			400 + 1000 * cosf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, -10, cosf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), 0, 1, 1, 1,              // v7 (bottom)
+			400 + 1000 * cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, -10, cosf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), 0, 1, 1, 1,              // v4
+			400 + 1000 * cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, 0, cosf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), 0, 1, 1, 1,              // v3
+			400 + 1000 * cosf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, 0, cosf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), 0, 1, 1, 1,              // v2
+
+			400 + 1000 * cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, -10, 0, 0, -1, 1, 1, 1,              // v4 (back)
+			400 + 1000 * cosf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, -10, 0, 0, -1, 1, 1, 1,              // v7
+			400, 400 + yp, -10, 0, 0, -1, 1, 1, 1,              // v6
+			400, 400 + yp, -10, 0, 0, -1, 1, 1, 1 };            // v5
+		memcpy(vertices2, verticesTemp2, sizeof(verticesTemp2));
+
+		barTemp = 6.0;
+
+		GLfloat verticesTemp3[216] = { 400, 400 + yp, 0, 0, 0, 1, 1, 1, 1,              // v0 (front)
+			400, 400 + yp, 0, 0, 0, 1, 1, 1, 1,              // v1
+			400 + 1000 * cosf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, 0, 0, 0, 1, 1, 1, 1,              // v2
+			400 + 1000 * cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, 0, 0, 0, 1, 1, 1, 1,              // v3
+
+			400, 400 + yp, 0, cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v0 (right)
+			400 + 1000 * cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, 0,  cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v3
+			400 + 1000 * cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, -10, cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v4
+			400, 400 + yp, -10, cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v5
+
+			400, 400 + yp, 0, 0, 1, 0, 1, 1, 1,              // v0 (top)
+			400, 400 + yp, -10, 0, 1, 0, 1, 1, 1,              // v5
+			400, 400 + yp, -10, 0, 1, 0, 1, 1, 1,              // v6
+			400, 400 + yp, 0, 0, 1, 0, 1, 1, 1,              // v1
+
+			400, 400 + yp, 0, cosf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v1 (left)
+			400, 400 + yp, -10, cosf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v6
+			400 + 1000 * cosf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, -10, cosf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v7
+			400 + 1000 * cosf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, 0, cosf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v2
+
+			400 + 1000 * cosf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, -10, cosf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), 0, 1, 1, 1,              // v7 (bottom)
+			400 + 1000 * cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, -10, cosf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), 0, 1, 1, 1,              // v4
+			400 + 1000 * cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, 0, cosf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), 0, 1, 1, 1,              // v3
+			400 + 1000 * cosf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, 0, cosf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), 0, 1, 1, 1,              // v2
+
+			400 + 1000 * cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, -10, 0, 0, -1, 1, 1, 1,              // v4 (back)
+			400 + 1000 * cosf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, -10, 0, 0, -1, 1, 1, 1,              // v7
+			400, 400 + yp, -10, 0, 0, -1, 1, 1, 1,              // v6
+			400, 400 + yp, -10, 0, 0, -1, 1, 1, 1 };            // v5
+		memcpy(vertices3, verticesTemp3, sizeof(verticesTemp3));
+
+		barTemp = 8.0;
+
+		GLfloat verticesTemp4[216] = { 400, 400 + yp, 0, 0, 0, 1, 1, 1, 1,              // v0 (front)
+			400, 400 + yp, 0, 0, 0, 1, 1, 1, 1,              // v1
+			400 + 1000 * cosf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, 0, 0, 0, 1, 1, 1, 1,              // v2
+			400 + 1000 * cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, 0, 0, 0, 1, 1, 1, 1,              // v3
+
+			400, 400 + yp, 0, cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v0 (right)
+			400 + 1000 * cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, 0,  cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v3
+			400 + 1000 * cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, -10, cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v4
+			400, 400 + yp, -10, cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v5
+
+			400, 400 + yp, 0, 0, 1, 0, 1, 1, 1,              // v0 (top)
+			400, 400 + yp, -10, 0, 1, 0, 1, 1, 1,              // v5
+			400, 400 + yp, -10, 0, 1, 0, 1, 1, 1,              // v6
+			400, 400 + yp, 0, 0, 1, 0, 1, 1, 1,              // v1
+
+			400, 400 + yp, 0, cosf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v1 (left)
+			400, 400 + yp, -10, cosf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v6
+			400 + 1000 * cosf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, -10, cosf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v7
+			400 + 1000 * cosf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, 0, cosf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v2
+
+			400 + 1000 * cosf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, -10, cosf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), 0, 1, 1, 1,              // v7 (bottom)
+			400 + 1000 * cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, -10, cosf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), 0, 1, 1, 1,              // v4
+			400 + 1000 * cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, 0, cosf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), 0, 1, 1, 1,              // v3
+			400 + 1000 * cosf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, 0, cosf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), 0, 1, 1, 1,              // v2
+
+			400 + 1000 * cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, -10, 0, 0, -1, 1, 1, 1,              // v4 (back)
+			400 + 1000 * cosf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, -10, 0, 0, -1, 1, 1, 1,              // v7
+			400, 400 + yp, -10, 0, 0, -1, 1, 1, 1,              // v6
+			400, 400 + yp, -10, 0, 0, -1, 1, 1, 1 };            // v5
+		memcpy(vertices4, verticesTemp4, sizeof(verticesTemp4));
+
+		barTemp = 10.0;
+
+		GLfloat verticesTemp5[216] = { 400, 400 + yp, 0, 0, 0, 1, 1, 1, 1,              // v0 (front)
+			400, 400 + yp, 0, 0, 0, 1, 1, 1, 1,              // v1
+			400 + 1000 * cosf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, 0, 0, 0, 1, 1, 1, 1,              // v2
+			400 + 1000 * cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, 0, 0, 0, 1, 1, 1, 1,              // v3
+
+			400, 400 + yp, 0, cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v0 (right)
+			400 + 1000 * cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, 0,  cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v3
+			400 + 1000 * cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, -10, cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v4
+			400, 400 + yp, -10, cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v5
+
+			400, 400 + yp, 0, 0, 1, 0, 1, 1, 1,              // v0 (top)
+			400, 400 + yp, -10, 0, 1, 0, 1, 1, 1,              // v5
+			400, 400 + yp, -10, 0, 1, 0, 1, 1, 1,              // v6
+			400, 400 + yp, 0, 0, 1, 0, 1, 1, 1,              // v1
+
+			400, 400 + yp, 0, cosf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v1 (left)
+			400, 400 + yp, -10, cosf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v6
+			400 + 1000 * cosf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, -10, cosf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v7
+			400 + 1000 * cosf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, 0, cosf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v2
+
+			400 + 1000 * cosf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, -10, cosf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), 0, 1, 1, 1,              // v7 (bottom)
+			400 + 1000 * cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, -10, cosf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), 0, 1, 1, 1,              // v4
+			400 + 1000 * cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, 0, cosf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), 0, 1, 1, 1,              // v3
+			400 + 1000 * cosf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, 0, cosf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), 0, 1, 1, 1,              // v2
+
+			400 + 1000 * cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, -10, 0, 0, -1, 1, 1, 1,              // v4 (back)
+			400 + 1000 * cosf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, -10, 0, 0, -1, 1, 1, 1,              // v7
+			400, 400 + yp, -10, 0, 0, -1, 1, 1, 1,              // v6
+			400, 400 + yp, -10, 0, 0, -1, 1, 1, 1 };            // v5
+		memcpy(vertices5, verticesTemp5, sizeof(verticesTemp5));
+
+		barTemp = 12.0;
+
+		GLfloat verticesTemp6[216] = { 400, 400 + yp, 0, 0, 0, 1, 1, 1, 1,              // v0 (front)
+			400, 400 + yp, 0, 0, 0, 1, 1, 1, 1,              // v1
+			400 + 1000 * cosf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, 0, 0, 0, 1, 1, 1, 1,              // v2
+			400 + 1000 * cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, 0, 0, 0, 1, 1, 1, 1,              // v3
+
+			400, 400 + yp, 0, cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v0 (right)
+			400 + 1000 * cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, 0,  cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v3
+			400 + 1000 * cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, -10, cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v4
+			400, 400 + yp, -10, cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v5
+
+			400, 400 + yp, 0, 0, 1, 0, 1, 1, 1,              // v0 (top)
+			400, 400 + yp, -10, 0, 1, 0, 1, 1, 1,              // v5
+			400, 400 + yp, -10, 0, 1, 0, 1, 1, 1,              // v6
+			400, 400 + yp, 0, 0, 1, 0, 1, 1, 1,              // v1
+
+			400, 400 + yp, 0, cosf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v1 (left)
+			400, 400 + yp, -10, cosf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v6
+			400 + 1000 * cosf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, -10, cosf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v7
+			400 + 1000 * cosf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, 0, cosf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v2
+
+			400 + 1000 * cosf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, -10, cosf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), 0, 1, 1, 1,              // v7 (bottom)
+			400 + 1000 * cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, -10, cosf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), 0, 1, 1, 1,              // v4
+			400 + 1000 * cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, 0, cosf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), 0, 1, 1, 1,              // v3
+			400 + 1000 * cosf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, 0, cosf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), 0, 1, 1, 1,              // v2
+
+			400 + 1000 * cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, -10, 0, 0, -1, 1, 1, 1,              // v4 (back)
+			400 + 1000 * cosf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, -10, 0, 0, -1, 1, 1, 1,              // v7
+			400, 400 + yp, -10, 0, 0, -1, 1, 1, 1,              // v6
+			400, 400 + yp, -10, 0, 0, -1, 1, 1, 1 };            // v5
+		memcpy(vertices6, verticesTemp6, sizeof(verticesTemp6));
+
+		barTemp = 14.0;
+
+		GLfloat verticesTemp7[216] = { 400, 400 + yp, 0, 0, 0, 1, 1, 1, 1,              // v0 (front)
+			400, 400 + yp, 0, 0, 0, 1, 1, 1, 1,              // v1
+			400 + 1000 * cosf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, 0, 0, 0, 1, 1, 1, 1,              // v2
+			400 + 1000 * cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, 0, 0, 0, 1, 1, 1, 1,              // v3
+
+			400, 400 + yp, 0, cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v0 (right)
+			400 + 1000 * cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, 0,  cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v3
+			400 + 1000 * cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, -10, cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v4
+			400, 400 + yp, -10, cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v5
+
+			400, 400 + yp, 0, 0, 1, 0, 1, 1, 1,              // v0 (top)
+			400, 400 + yp, -10, 0, 1, 0, 1, 1, 1,              // v5
+			400, 400 + yp, -10, 0, 1, 0, 1, 1, 1,              // v6
+			400, 400 + yp, 0, 0, 1, 0, 1, 1, 1,              // v1
+
+			400, 400 + yp, 0, cosf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v1 (left)
+			400, 400 + yp, -10, cosf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v6
+			400 + 1000 * cosf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, -10, cosf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v7
+			400 + 1000 * cosf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, 0, cosf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v2
+
+			400 + 1000 * cosf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, -10, cosf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), 0, 1, 1, 1,              // v7 (bottom)
+			400 + 1000 * cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, -10, cosf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), 0, 1, 1, 1,              // v4
+			400 + 1000 * cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, 0, cosf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), 0, 1, 1, 1,              // v3
+			400 + 1000 * cosf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, 0, cosf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), 0, 1, 1, 1,              // v2
+
+			400 + 1000 * cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, -10, 0, 0, -1, 1, 1, 1,              // v4 (back)
+			400 + 1000 * cosf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, -10, 0, 0, -1, 1, 1, 1,              // v7
+			400, 400 + yp, -10, 0, 0, -1, 1, 1, 1,              // v6
+			400, 400 + yp, -10, 0, 0, -1, 1, 1, 1 };            // v5
+		memcpy(vertices7, verticesTemp7, sizeof(verticesTemp7));
+
+		barTemp = 16.0;
+
+		GLfloat verticesTemp8[216] = { 400, 400 + yp, 0, 0, 0, 1, 1, 1, 1,              // v0 (front)
+			400, 400 + yp, 0, 0, 0, 1, 1, 1, 1,              // v1
+			400 + 1000 * cosf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, 0, 0, 0, 1, 1, 1, 1,              // v2
+			400 + 1000 * cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, 0, 0, 0, 1, 1, 1, 1,              // v3
+
+			400, 400 + yp, 0, cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v0 (right)
+			400 + 1000 * cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, 0,  cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v3
+			400 + 1000 * cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, -10, cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v4
+			400, 400 + yp, -10, cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v5
+
+			400, 400 + yp, 0, 0, 1, 0, 1, 1, 1,              // v0 (top)
+			400, 400 + yp, -10, 0, 1, 0, 1, 1, 1,              // v5
+			400, 400 + yp, -10, 0, 1, 0, 1, 1, 1,              // v6
+			400, 400 + yp, 0, 0, 1, 0, 1, 1, 1,              // v1
+
+			400, 400 + yp, 0, cosf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v1 (left)
+			400, 400 + yp, -10, cosf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v6
+			400 + 1000 * cosf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, -10, cosf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v7
+			400 + 1000 * cosf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, 0, cosf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v2
+
+			400 + 1000 * cosf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, -10, cosf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), 0, 1, 1, 1,              // v7 (bottom)
+			400 + 1000 * cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, -10, cosf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), 0, 1, 1, 1,              // v4
+			400 + 1000 * cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, 0, cosf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), 0, 1, 1, 1,              // v3
+			400 + 1000 * cosf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, 0, cosf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), 0, 1, 1, 1,              // v2
+
+			400 + 1000 * cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, -10, 0, 0, -1, 1, 1, 1,              // v4 (back)
+			400 + 1000 * cosf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, -10, 0, 0, -1, 1, 1, 1,              // v7
+			400, 400 + yp, -10, 0, 0, -1, 1, 1, 1,              // v6
+			400, 400 + yp, -10, 0, 0, -1, 1, 1, 1 };            // v5
+		memcpy(vertices8, verticesTemp8, sizeof(verticesTemp8));
+
+		barTemp = 18.0;
+
+		GLfloat verticesTemp9[216] = { 400, 400 + yp, 0, 0, 0, 1, 1, 1, 1,              // v0 (front)
+			400, 400 + yp, 0, 0, 0, 1, 1, 1, 1,              // v1
+			400 + 1000 * cosf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, 0, 0, 0, 1, 1, 1, 1,              // v2
+			400 + 1000 * cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, 0, 0, 0, 1, 1, 1, 1,              // v3
+
+			400, 400 + yp, 0, cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v0 (right)
+			400 + 1000 * cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, 0,  cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v3
+			400 + 1000 * cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, -10, cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v4
+			400, 400 + yp, -10, cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v5
+
+			400, 400 + yp, 0, 0, 1, 0, 1, 1, 1,              // v0 (top)
+			400, 400 + yp, -10, 0, 1, 0, 1, 1, 1,              // v5
+			400, 400 + yp, -10, 0, 1, 0, 1, 1, 1,              // v6
+			400, 400 + yp, 0, 0, 1, 0, 1, 1, 1,              // v1
+
+			400, 400 + yp, 0, cosf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v1 (left)
+			400, 400 + yp, -10, cosf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v6
+			400 + 1000 * cosf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, -10, cosf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v7
+			400 + 1000 * cosf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, 0, cosf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v2
+
+			400 + 1000 * cosf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, -10, cosf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), 0, 1, 1, 1,              // v7 (bottom)
+			400 + 1000 * cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, -10, cosf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), 0, 1, 1, 1,              // v4
+			400 + 1000 * cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, 0, cosf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), 0, 1, 1, 1,              // v3
+			400 + 1000 * cosf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, 0, cosf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), 0, 1, 1, 1,              // v2
+
+			400 + 1000 * cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, -10, 0, 0, -1, 1, 1, 1,              // v4 (back)
+			400 + 1000 * cosf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, -10, 0, 0, -1, 1, 1, 1,              // v7
+			400, 400 + yp, -10, 0, 0, -1, 1, 1, 1,              // v6
+			400, 400 + yp, -10, 0, 0, -1, 1, 1, 1 };            // v5
+		memcpy(vertices9, verticesTemp9, sizeof(verticesTemp9));
+
+		barTemp = 20.0;
+
+		GLfloat verticesTemp10[216] = { 400, 400 + yp, 0, 0, 0, 1, 1, 1, 1,              // v0 (front)
+			400, 400 + yp, 0, 0, 0, 1, 1, 1, 1,              // v1
+			400 + 1000 * cosf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, 0, 0, 0, 1, 1, 1, 1,              // v2
+			400 + 1000 * cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, 0, 0, 0, 1, 1, 1, 1,              // v3
+
+			400, 400 + yp, 0, cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v0 (right)
+			400 + 1000 * cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, 0,  cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v3
+			400 + 1000 * cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, -10, cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v4
+			400, 400 + yp, -10, cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v5
+
+			400, 400 + yp, 0, 0, 1, 0, 1, 1, 1,              // v0 (top)
+			400, 400 + yp, -10, 0, 1, 0, 1, 1, 1,              // v5
+			400, 400 + yp, -10, 0, 1, 0, 1, 1, 1,              // v6
+			400, 400 + yp, 0, 0, 1, 0, 1, 1, 1,              // v1
+
+			400, 400 + yp, 0, cosf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v1 (left)
+			400, 400 + yp, -10, cosf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v6
+			400 + 1000 * cosf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, -10, cosf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v7
+			400 + 1000 * cosf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, 0, cosf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v2
+
+			400 + 1000 * cosf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, -10, cosf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), 0, 1, 1, 1,              // v7 (bottom)
+			400 + 1000 * cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, -10, cosf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), 0, 1, 1, 1,              // v4
+			400 + 1000 * cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, 0, cosf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), 0, 1, 1, 1,              // v3
+			400 + 1000 * cosf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, 0, cosf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), 0, 1, 1, 1,              // v2
+
+			400 + 1000 * cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, -10, 0, 0, -1, 1, 1, 1,              // v4 (back)
+			400 + 1000 * cosf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, -10, 0, 0, -1, 1, 1, 1,              // v7
+			400, 400 + yp, -10, 0, 0, -1, 1, 1, 1,              // v6
+			400, 400 + yp, -10, 0, 0, -1, 1, 1, 1 };           // v5
+		memcpy(vertices10, verticesTemp10, sizeof(verticesTemp10));
+
+		barTemp = 22.0;
+
+		GLfloat verticesTemp11[216] = { 400, 400 + yp, 0, 0, 0, 1, 1, 1, 1,              // v0 (front)
+			400, 400 + yp, 0, 0, 0, 1, 1, 1, 1,              // v1
+			400 + 1000 * cosf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, 0, 0, 0, 1, 1, 1, 1,              // v2
+			400 + 1000 * cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, 0, 0, 0, 1, 1, 1, 1,              // v3
+
+			400, 400 + yp, 0, cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v0 (right)
+			400 + 1000 * cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, 0,  cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v3
+			400 + 1000 * cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, -10, cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v4
+			400, 400 + yp, -10, cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v5
+
+			400, 400 + yp, 0, 0, 1, 0, 1, 1, 1,              // v0 (top)
+			400, 400 + yp, -10, 0, 1, 0, 1, 1, 1,              // v5
+			400, 400 + yp, -10, 0, 1, 0, 1, 1, 1,              // v6
+			400, 400 + yp, 0, 0, 1, 0, 1, 1, 1,              // v1
+
+			400, 400 + yp, 0, cosf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v1 (left)
+			400, 400 + yp, -10, cosf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v6
+			400 + 1000 * cosf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, -10, cosf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v7
+			400 + 1000 * cosf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, 0, cosf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v2
+
+			400 + 1000 * cosf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, -10, cosf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), 0, 1, 1, 1,              // v7 (bottom)
+			400 + 1000 * cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, -10, cosf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), 0, 1, 1, 1,              // v4
+			400 + 1000 * cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, 0, cosf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), 0, 1, 1, 1,              // v3
+			400 + 1000 * cosf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, 0, cosf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), 0, 1, 1, 1,              // v2
+
+			400 + 1000 * cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, -10, 0, 0, -1, 1, 1, 1,              // v4 (back)
+			400 + 1000 * cosf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, -10, 0, 0, -1, 1, 1, 1,              // v7
+			400, 400 + yp, -10, 0, 0, -1, 1, 1, 1,              // v6
+			400, 400 + yp, -10, 0, 0, -1, 1, 1, 1 };            // v5
+		memcpy(vertices11, verticesTemp11, sizeof(verticesTemp11));
+
+		barTemp = 24.0;
+
+		GLfloat verticesTemp12[216] = { 400, 400 + yp, 0, 0, 0, 1, 1, 1, 1,              // v0 (front)
+			400, 400 + yp, 0, 0, 0, 1, 1, 1, 1,              // v1
+			400 + 1000 * cosf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, 0, 0, 0, 1, 1, 1, 1,              // v2
+			400 + 1000 * cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, 0, 0, 0, 1, 1, 1, 1,              // v3
+
+			400, 400 + yp, 0, cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v0 (right)
+			400 + 1000 * cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, 0,  cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v3
+			400 + 1000 * cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, -10, cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v4
+			400, 400 + yp, -10, cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v5
+
+			400, 400 + yp, 0, 0, 1, 0, 1, 1, 1,              // v0 (top)
+			400, 400 + yp, -10, 0, 1, 0, 1, 1, 1,              // v5
+			400, 400 + yp, -10, 0, 1, 0, 1, 1, 1,              // v6
+			400, 400 + yp, 0, 0, 1, 0, 1, 1, 1,              // v1
+
+			400, 400 + yp, 0, cosf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v1 (left)
+			400, 400 + yp, -10, cosf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v6
+			400 + 1000 * cosf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, -10, cosf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v7
+			400 + 1000 * cosf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, 0, cosf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v2
+
+			400 + 1000 * cosf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, -10, cosf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), 0, 1, 1, 1,              // v7 (bottom)
+			400 + 1000 * cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, -10, cosf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), 0, 1, 1, 1,              // v4
+			400 + 1000 * cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, 0, cosf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), 0, 1, 1, 1,              // v3
+			400 + 1000 * cosf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, 0, cosf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), 0, 1, 1, 1,              // v2
+
+			400 + 1000 * cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, -10, 0, 0, -1, 1, 1, 1,              // v4 (back)
+			400 + 1000 * cosf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, -10, 0, 0, -1, 1, 1, 1,              // v7
+			400, 400 + yp, -10, 0, 0, -1, 1, 1, 1,              // v6
+			400, 400 + yp, -10, 0, 0, -1, 1, 1, 1 };            // v5
+		memcpy(vertices12, verticesTemp12, sizeof(verticesTemp12));
+
+		barTemp = 26.0;
+
+		GLfloat verticesTemp13[216] = { 400, 400 + yp, 0, 0, 0, 1, 1, 1, 1,              // v0 (front)
+			400, 400 + yp, 0, 0, 0, 1, 1, 1, 1,              // v1
+			400 + 1000 * cosf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, 0, 0, 0, 1, 1, 1, 1,              // v2
+			400 + 1000 * cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, 0, 0, 0, 1, 1, 1, 1,              // v3
+
+			400, 400 + yp, 0, cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v0 (right)
+			400 + 1000 * cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, 0,  cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v3
+			400 + 1000 * cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, -10, cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v4
+			400, 400 + yp, -10, cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v5
+
+			400, 400 + yp, 0, 0, 1, 0, 1, 1, 1,              // v0 (top)
+			400, 400 + yp, -10, 0, 1, 0, 1, 1, 1,              // v5
+			400, 400 + yp, -10, 0, 1, 0, 1, 1, 1,              // v6
+			400, 400 + yp, 0, 0, 1, 0, 1, 1, 1,              // v1
+
+			400, 400 + yp, 0, cosf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v1 (left)
+			400, 400 + yp, -10, cosf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v6
+			400 + 1000 * cosf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, -10, cosf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v7
+			400 + 1000 * cosf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, 0, cosf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v2
+
+			400 + 1000 * cosf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, -10, cosf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), 0, 1, 1, 1,              // v7 (bottom)
+			400 + 1000 * cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, -10, cosf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), 0, 1, 1, 1,              // v4
+			400 + 1000 * cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, 0, cosf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), 0, 1, 1, 1,              // v3
+			400 + 1000 * cosf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, 0, cosf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), 0, 1, 1, 1,              // v2
+
+			400 + 1000 * cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, -10, 0, 0, -1, 1, 1, 1,              // v4 (back)
+			400 + 1000 * cosf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, -10, 0, 0, -1, 1, 1, 1,              // v7
+			400, 400 + yp, -10, 0, 0, -1, 1, 1, 1,              // v6
+			400, 400 + yp, -10, 0, 0, -1, 1, 1, 1 };            // v5
+		memcpy(vertices13, verticesTemp13, sizeof(verticesTemp13));
+
+		barTemp = 28.0;
+
+		GLfloat verticesTemp14[216] = { 400, 400 + yp, 0, 0, 0, 1, 1, 1, 1,              // v0 (front)
+			400, 400 + yp, 0, 0, 0, 1, 1, 1, 1,              // v1
+			400 + 1000 * cosf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, 0, 0, 0, 1, 1, 1, 1,              // v2
+			400 + 1000 * cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, 0, 0, 0, 1, 1, 1, 1,              // v3
+
+			400, 400 + yp, 0, cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v0 (right)
+			400 + 1000 * cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, 0,  cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v3
+			400 + 1000 * cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, -10, cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v4
+			400, 400 + yp, -10, cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v5
+
+			400, 400 + yp, 0, 0, 1, 0, 1, 1, 1,              // v0 (top)
+			400, 400 + yp, -10, 0, 1, 0, 1, 1, 1,              // v5
+			400, 400 + yp, -10, 0, 1, 0, 1, 1, 1,              // v6
+			400, 400 + yp, 0, 0, 1, 0, 1, 1, 1,              // v1
+
+			400, 400 + yp, 0, cosf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v1 (left)
+			400, 400 + yp, -10, cosf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v6
+			400 + 1000 * cosf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, -10, cosf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v7
+			400 + 1000 * cosf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, 0, cosf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v2
+
+			400 + 1000 * cosf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, -10, cosf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), 0, 1, 1, 1,              // v7 (bottom)
+			400 + 1000 * cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, -10, cosf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), 0, 1, 1, 1,              // v4
+			400 + 1000 * cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, 0, cosf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), 0, 1, 1, 1,              // v3
+			400 + 1000 * cosf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, 0, cosf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), 0, 1, 1, 1,              // v2
+
+			400 + 1000 * cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, -10, 0, 0, -1, 1, 1, 1,              // v4 (back)
+			400 + 1000 * cosf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, -10, 0, 0, -1, 1, 1, 1,              // v7
+			400, 400 + yp, -10, 0, 0, -1, 1, 1, 1,              // v6
+			400, 400 + yp, -10, 0, 0, -1, 1, 1, 1 };            // v5
+		memcpy(vertices14, verticesTemp14, sizeof(verticesTemp14));
+
+		barTemp = 30.0;
+
+		GLfloat verticesTemp15[216] = { 400, 400 + yp, 0, 0, 0, 1, 1, 1, 1,              // v0 (front)
+			400, 400 + yp, 0, 0, 0, 1, 1, 1, 1,              // v1
+			400 + 1000 * cosf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, 0, 0, 0, 1, 1, 1, 1,              // v2
+			400 + 1000 * cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, 0, 0, 0, 1, 1, 1, 1,              // v3
+
+			400, 400 + yp, 0, cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v0 (right)
+			400 + 1000 * cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, 0,  cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v3
+			400 + 1000 * cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, -10, cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v4
+			400, 400 + yp, -10, cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v5
+
+			400, 400 + yp, 0, 0, 1, 0, 1, 1, 1,              // v0 (top)
+			400, 400 + yp, -10, 0, 1, 0, 1, 1, 1,              // v5
+			400, 400 + yp, -10, 0, 1, 0, 1, 1, 1,              // v6
+			400, 400 + yp, 0, 0, 1, 0, 1, 1, 1,              // v1
+
+			400, 400 + yp, 0, cosf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v1 (left)
+			400, 400 + yp, -10, cosf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v6
+			400 + 1000 * cosf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, -10, cosf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v7
+			400 + 1000 * cosf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, 0, cosf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v2
+
+			400 + 1000 * cosf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, -10, cosf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), 0, 1, 1, 1,              // v7 (bottom)
+			400 + 1000 * cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, -10, cosf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), 0, 1, 1, 1,              // v4
+			400 + 1000 * cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, 0, cosf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), 0, 1, 1, 1,              // v3
+			400 + 1000 * cosf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, 0, cosf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), 0, 1, 1, 1,              // v2
+
+			400 + 1000 * cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, -10, 0, 0, -1, 1, 1, 1,              // v4 (back)
+			400 + 1000 * cosf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, -10, 0, 0, -1, 1, 1, 1,              // v7
+			400, 400 + yp, -10, 0, 0, -1, 1, 1, 1,              // v6
+			400, 400 + yp, -10, 0, 0, -1, 1, 1, 1 };            // v5
+		memcpy(vertices15, verticesTemp15, sizeof(verticesTemp15));
+
+		barTemp = 32.0;
+
+		GLfloat verticesTemp16[216] = { 400, 400 + yp, 0, 0, 0, 1, 1, 1, 1,              // v0 (front)
+			400, 400 + yp, 0, 0, 0, 1, 1, 1, 1,              // v1
+			400 + 1000 * cosf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, 0, 0, 0, 1, 1, 1, 1,              // v2
+			400 + 1000 * cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, 0, 0, 0, 1, 1, 1, 1,              // v3
+
+			400, 400 + yp, 0, cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v0 (right)
+			400 + 1000 * cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, 0,  cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v3
+			400 + 1000 * cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, -10, cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v4
+			400, 400 + yp, -10, cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v5
+
+			400, 400 + yp, 0, 0, 1, 0, 1, 1, 1,              // v0 (top)
+			400, 400 + yp, -10, 0, 1, 0, 1, 1, 1,              // v5
+			400, 400 + yp, -10, 0, 1, 0, 1, 1, 1,              // v6
+			400, 400 + yp, 0, 0, 1, 0, 1, 1, 1,              // v1
+
+			400, 400 + yp, 0, cosf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v1 (left)
+			400, 400 + yp, -10, cosf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v6
+			400 + 1000 * cosf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, -10, cosf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v7
+			400 + 1000 * cosf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, 0, cosf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v2
+
+			400 + 1000 * cosf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, -10, cosf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), 0, 1, 1, 1,              // v7 (bottom)
+			400 + 1000 * cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, -10, cosf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), 0, 1, 1, 1,              // v4
+			400 + 1000 * cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, 0, cosf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), 0, 1, 1, 1,              // v3
+			400 + 1000 * cosf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, 0, cosf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), 0, 1, 1, 1,              // v2
+
+			400 + 1000 * cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, -10, 0, 0, -1, 1, 1, 1,              // v4 (back)
+			400 + 1000 * cosf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, -10, 0, 0, -1, 1, 1, 1,              // v7
+			400, 400 + yp, -10, 0, 0, -1, 1, 1, 1,              // v6
+			400, 400 + yp, -10, 0, 0, -1, 1, 1, 1 };            // v5
+		memcpy(vertices16, verticesTemp16, sizeof(verticesTemp16));
+
+		barTemp = 34.0;
+
+		GLfloat verticesTemp17[216] = { 400, 400 + yp, 0, 0, 0, 1, 1, 1, 1,              // v0 (front)
+			400, 400 + yp, 0, 0, 0, 1, 1, 1, 1,              // v1
+			400 + 1000 * cosf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, 0, 0, 0, 1, 1, 1, 1,              // v2
+			400 + 1000 * cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, 0, 0, 0, 1, 1, 1, 1,              // v3
+
+			400, 400 + yp, 0, cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v0 (right)
+			400 + 1000 * cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, 0,  cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v3
+			400 + 1000 * cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, -10, cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v4
+			400, 400 + yp, -10, cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v5
+
+			400, 400 + yp, 0, 0, 1, 0, 1, 1, 1,              // v0 (top)
+			400, 400 + yp, -10, 0, 1, 0, 1, 1, 1,              // v5
+			400, 400 + yp, -10, 0, 1, 0, 1, 1, 1,              // v6
+			400, 400 + yp, 0, 0, 1, 0, 1, 1, 1,              // v1
+
+			400, 400 + yp, 0, cosf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v1 (left)
+			400, 400 + yp, -10, cosf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v6
+			400 + 1000 * cosf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, -10, cosf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v7
+			400 + 1000 * cosf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, 0, cosf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v2
+
+			400 + 1000 * cosf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, -10, cosf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), 0, 1, 1, 1,              // v7 (bottom)
+			400 + 1000 * cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, -10, cosf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), 0, 1, 1, 1,              // v4
+			400 + 1000 * cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, 0, cosf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), 0, 1, 1, 1,              // v3
+			400 + 1000 * cosf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, 0, cosf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 180.0), 0, 1, 1, 1,              // v2
+
+			400 + 1000 * cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, -10, 0, 0, -1, 1, 1, 1,              // v4 (back)
+			400 + 1000 * cosf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, -10, 0, 0, -1, 1, 1, 1,              // v7
+			400, 400 + yp, -10, 0, 0, -1, 1, 1, 1,              // v6
+			400, 400 + yp, -10, 0, 0, -1, 1, 1, 1 };            // v5
+		memcpy(vertices17, verticesTemp17, sizeof(verticesTemp17));
 	}
 	else {
-		gluLookAt(x + lx, 0.0f, z,
-			  x + lx, 0.0f, z + lz,
-			  0.0f, 1.0f, 0.0f);
-	}
-	
-	//}
-	aggrlx += lx;
-	if (centered) {
-		lx = 0;
-		centering = 0;
-		centered = 0;
-	}
-	//printf("\n%f", aggrlx);
-	//printf("\n%d", x + lx);
-	//printf("xp is %f\n", xp);
-	//printf("aggrlx is %f\n", aggrlx);
-	//printf("%f\n", (400 + (bars[14] + 1) * barwidth + xp));
-
-	for (int i = 0; i < 18; i++) {
-		if (isLeft[i] && (400 + (bars[i] - 1) * barwidth + xp) >= aggrlx) { //When the leftmost edge of the leftmost bar is within the screen, freak out (aka send the rightmost bar to the left)
-			bars[(i + 17) % 18] -= 60;
-			isLeft[(i + 17) % 18] = true;
-			isLeft[i] = false;
-			isRight[(i + 17) % 18] = false;
-			isRight[(i + 16) % 18] = true;
-			//printf("Moving rightmost bar to the left\n");
+		if (horizontal) {
+			gluLookAt(x + lx, 0.0f, z,
+				x + lx, 0.0f, z + lz,
+				1.0f, 0.0f, 0.0f);
 		}
-		else if (isRight[i] && (400 + (bars[i] + 1) * barwidth + xp) <= aggrlx + 800) {
-			bars[(i + 1) % 18] += 60;
-			isRight[(i + 1) % 18] = true;
-			isRight[i] = false;
-			isLeft[(i + 1) % 18] = false;
-			isLeft[(i + 2) % 18] = true;
-			//printf("Moving leftmost bar to the right\n");
+		else {
+			gluLookAt(x + lx, 0.0f, z,
+				x + lx, 0.0f, z + lz,
+				0.0f, 1.0f, 0.0f);
 		}
+
+		//}
+		aggrlx += lx;
+		if (centered) {
+			lx = 0;
+			centering = 0;
+			centered = 0;
+		}
+		//printf("\n%f", aggrlx);
+		//printf("\n%d", x + lx);
+		//printf("xp is %f\n", xp);
+		//printf("aggrlx is %f\n", aggrlx);
+		//printf("%f\n", (400 + (bars[14] + 1) * barwidth + xp));
+
+		for (int i = 0; i < 18; i++) {
+			if (isLeft[i] && (400 + (bars[i] - 1) * barwidth + xp) >= aggrlx) { //When the leftmost edge of the leftmost bar is within the screen, freak out (aka send the rightmost bar to the left)
+				bars[(i + 17) % 18] -= 60;
+				isLeft[(i + 17) % 18] = true;
+				isLeft[i] = false;
+				isRight[(i + 17) % 18] = false;
+				isRight[(i + 16) % 18] = true;
+				//printf("Moving rightmost bar to the left\n");
+			}
+			else if (isRight[i] && (400 + (bars[i] + 1) * barwidth + xp) <= aggrlx + 800) {
+				bars[(i + 1) % 18] += 60;
+				isRight[(i + 1) % 18] = true;
+				isRight[i] = false;
+				isLeft[(i + 1) % 18] = false;
+				isLeft[(i + 2) % 18] = true;
+				//printf("Moving leftmost bar to the right\n");
+			}
+		}
+
+		int barTemp = bars[0];
+		/*
+		glBegin(GL_QUADS);  //Rectangle drawing
+		// Will be using xp and yp as our changing x-position and y-position in our window
+		glVertex3f(400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0);	//475
+		glVertex3f(400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0);	//325
+		glVertex3f(400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0);
+		glVertex3f(400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0);
+
+		glEnd();
+		*/
+
+		GLfloat verticesTemp0[216] = { 400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0, 0, 0, 1, 1, 1, 1,              // v0 (front)
+			400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0, 0, 0, 1, 1, 1, 1,              // v1
+			400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0, 0, 0, 1, 1, 1, 1,              // v2
+			400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0, 0, 0, 1, 1, 1, 1,              // v3
+
+			400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0, 1, 0, 0, 1, 1, 1,              // v0 (right)
+			400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0, 1, 0, 0, 1, 1, 1,              // v3
+			400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10, 1, 0, 0, 1, 1, 1,              // v4
+			400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10, 1, 0, 0, 1, 1, 1,              // v5
+
+			400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0, 0, 1, 0, 1, 1, 1,              // v0 (top)
+			400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10, 0, 1, 0, 1, 1, 1,              // v5
+			400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10, 0, 1, 0, 1, 1, 1,              // v6
+			400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0, 0, 1, 0, 1, 1, 1,              // v1
+
+			400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0, -1, 0, 0, 1, 1, 1,              // v1 (left)
+			400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10, -1, 0, 0, 1, 1, 1,              // v6
+			400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10, -1, 0, 0, 1, 1, 1,              // v7
+			400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0, -1, 0, 0, 1, 1, 1,              // v2
+
+			400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10, 0, -1, 0, 1, 1, 1,              // v7 (bottom)
+			400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10, 0, -1, 0, 1, 1, 1,              // v4
+			400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0, 0, -1, 0, 1, 1, 1,              // v3
+			400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0, 0, -1, 0, 1, 1, 1,              // v2
+
+			400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10, 0, 0, -1, 1, 1, 1,              // v4 (back)
+			400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10, 0, 0, -1, 1, 1, 1,              // v7
+			400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10, 0, 0, -1, 1, 1, 1,              // v6
+			400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10, 0, 0, -1, 1, 1, 1 };            // v5
+		memcpy(vertices0, verticesTemp0, sizeof(verticesTemp0));
+
+		barTemp = bars[1];
+
+		/*
+		glBegin(GL_QUADS);  //Rectangle drawing
+		// Will be using xp and yp as our changing x-position and y-position in our window
+		glVertex3f(400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0);	//475
+		glVertex3f(400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0);	//325
+		glVertex3f(400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0);
+		glVertex3f(400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0);
+
+		glEnd();
+		*/
+
+		GLfloat verticesTemp1[216] = { 400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v0 (front)
+			400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v1
+			400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,              // v2
+			400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,              // v3
+
+			400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   1, 0, 0,   1, 1, 1,              // v0 (right)
+			400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   1, 0, 0,   1, 1, 1,              // v3
+			400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   1, 0, 0,   1, 1, 1,              // v4
+			400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   1, 0, 0,  1, 1, 1,              // v5
+
+			400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v0 (top)
+			400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,  0, 1, 0,   1, 1, 1,              // v5
+			400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 1, 0,   1, 1, 1,              // v6
+			400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v1
+
+			400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v1 (left)
+			400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,  -1, 0, 0,  1, 1, 1,              // v6
+			400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,  -1, 0, 0,   1, 1, 1,              // v7
+			400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v2
+
+			400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,  1, 1, 1,              // v7 (bottom)
+			400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,   1, 1, 1,              // v4
+			400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v3
+			400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v2
+
+			400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v4 (back)
+			400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v7
+			400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,  1, 1, 1,              // v6
+			400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,  1, 1, 1 };            // v5
+		memcpy(vertices1, verticesTemp1, sizeof(verticesTemp1));
+
+		barTemp = bars[2];
+
+		/*
+		glBegin(GL_QUADS);  //Rectangle drawing
+		// Will be using xp and yp as our changing x-position and y-position in our window
+		glVertex3f(400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0);	//475
+		glVertex3f(400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0);	//325
+		glVertex3f(400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0);
+		glVertex3f(400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0);
+
+		glEnd();
+		*/
+
+		GLfloat verticesTemp2[216] = { 400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v0 (front)
+			400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v1
+			400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,  1, 1, 1,              // v2
+			400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,              // v3
+
+			400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   1, 0, 0,   1, 1, 1,              // v0 (right)
+			400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   1, 0, 0,  1, 1, 1,              // v3
+			400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   1, 0, 0,   1, 1, 1,              // v4
+			400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   1, 0, 0,   1, 1, 1,              // v5
+
+			400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v0 (top)
+			400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,  0, 1, 0,    1, 1, 1,              // v5
+			400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 1, 0,   1, 1, 1,              // v6
+			400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v1
+
+			400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v1 (left)
+			400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,  -1, 0, 0,   1, 1, 1,              // v6
+			400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,  -1, 0, 0,  1, 1, 1,              // v7
+			400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,  -1, 0, 0,  1, 1, 1,              // v2
+
+			400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,  1, 1, 1,              // v7 (bottom)
+			400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,  1, 1, 1,              // v4
+			400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v3
+			400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v2
+
+			400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v4 (back)
+			400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v7
+			400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,   1, 1, 1,              // v6
+			400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,   1, 1, 1 };            // v5
+		memcpy(vertices2, verticesTemp2, sizeof(verticesTemp2));
+
+		barTemp = bars[3];
+
+		/*
+		glBegin(GL_QUADS);  //Rectangle drawing
+		// Will be using xp and yp as our changing x-position and y-position in our window
+		glVertex3f(400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0);	//475
+		glVertex3f(400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0);	//325
+		glVertex3f(400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0);
+		glVertex3f(400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0);
+
+		glEnd();
+		*/
+
+		GLfloat verticesTemp3[216] = { 400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v0 (front)
+			400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v1
+			400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,             // v2
+			400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,              // v3
+
+			400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   1, 0, 0,   1, 1, 1,              // v0 (right)
+			400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   1, 0, 0,   1, 1, 1,              // v3
+			400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   1, 0, 0,   1, 1, 1,              // v4
+			400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   1, 0, 0,   1, 1, 1,              // v5
+
+			400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v0 (top)
+			400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,  0, 1, 0,   1, 1, 1,              // v5
+			400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 1, 0,  1, 1, 1,              // v6
+			400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v1
+
+			400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v1 (left)
+			400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,  -1, 0, 0,   1, 1, 1,              // v6
+			400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,  -1, 0, 0,   1, 1, 1,              // v7
+			400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v2
+
+			400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,  1, 1, 1,              // v7 (bottom)
+			400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,   1, 1, 1,              // v4
+			400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,             // v3
+			400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v2
+
+			400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v4 (back)
+			400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v7
+			400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,   1, 1, 1,              // v6
+			400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,   1, 1, 1 };            // v5
+		memcpy(vertices3, verticesTemp3, sizeof(verticesTemp3));
+
+		barTemp = bars[4];
+
+		/*
+		glBegin(GL_QUADS);  //Rectangle drawing
+		// Will be using xp and yp as our changing x-position and y-position in our window
+		glVertex3f(400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0);	//475
+		glVertex3f(400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0);	//325
+		glVertex3f(400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0);
+		glVertex3f(400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0);
+
+		glEnd();
+		*/
+
+		GLfloat verticesTemp4[216] = { 400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v0 (front)
+			400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v1
+			400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,              // v2
+			400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,             // v3
+
+			400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   1, 0, 0,   1, 1, 1,              // v0 (right)
+			400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   1, 0, 0,   1, 1, 1,              // v3
+			400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   1, 0, 0,   1, 1, 1,              // v4
+			400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   1, 0, 0,   1, 1, 1,             // v5
+
+			400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v0 (top)
+			400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,  0, 1, 0,    1, 1, 1,              // v5
+			400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 1, 0,   1, 1, 1,              // v6
+			400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v1
+
+			400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v1 (left)
+			400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,  -1, 0, 0,   1, 1, 1,              // v6
+			400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,  -1, 0, 0,   1, 1, 1,              // v7
+			400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v2
+
+			400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,   1, 1, 1,              // v7 (bottom)
+			400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,   1, 1, 1,              // v4
+			400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v3
+			400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v2
+
+			400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v4 (back)
+			400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v7
+			400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,   1, 1, 1,              // v6
+			400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,   1, 1, 1 };            // v5
+		memcpy(vertices4, verticesTemp4, sizeof(verticesTemp4));
+
+		barTemp = bars[5];
+
+		/*
+		glBegin(GL_QUADS);  //Rectangle drawing
+		// Will be using xp and yp as our changing x-position and y-position in our window
+		glVertex3f(400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0);	//475
+		glVertex3f(400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0);	//325
+		glVertex3f(400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0);
+		glVertex3f(400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0);
+
+		glEnd();
+		*/
+
+		GLfloat verticesTemp5[216] = { 400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v0 (front)
+			400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v1
+			400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,              // v2
+			400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,             // v3
+
+			400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   1, 0, 0,   1, 1, 1,              // v0 (right)
+			400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   1, 0, 0,   1, 1, 1,              // v3
+			400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   1, 0, 0,   1, 1, 1,              // v4
+			400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   1, 0, 0,   1, 1, 1,             // v5
+
+			400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v0 (top)
+			400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,  0, 1, 0,    1, 1, 1,              // v5
+			400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 1, 0,   1, 1, 1,              // v6
+			400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v1
+
+			400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v1 (left)
+			400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,  -1, 0, 0,   1, 1, 1,              // v6
+			400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,  -1, 0, 0,   1, 1, 1,              // v7
+			400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v2
+
+			400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,   1, 1, 1,              // v7 (bottom)
+			400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,   1, 1, 1,              // v4
+			400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v3
+			400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v2
+
+			400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v4 (back)
+			400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v7
+			400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,   1, 1, 1,              // v6
+			400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,   1, 1, 1 };            // v5
+		memcpy(vertices5, verticesTemp5, sizeof(verticesTemp5));
+
+		barTemp = bars[6];
+
+		/*
+		glBegin(GL_QUADS);  //Rectangle drawing
+		// Will be using xp and yp as our changing x-position and y-position in our window
+		glVertex3f(400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0);	//475
+		glVertex3f(400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0);	//325
+		glVertex3f(400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0);
+		glVertex3f(400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0);
+
+		glEnd();
+		*/
+
+		GLfloat verticesTemp6[216] = { 400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v0 (front)
+			400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v1
+			400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,              // v2
+			400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,             // v3
+
+			400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   1, 0, 0,   1, 1, 1,              // v0 (right)
+			400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   1, 0, 0,   1, 1, 1,              // v3
+			400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   1, 0, 0,   1, 1, 1,              // v4
+			400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   1, 0, 0,   1, 1, 1,             // v5
+
+			400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v0 (top)
+			400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,  0, 1, 0,    1, 1, 1,              // v5
+			400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 1, 0,   1, 1, 1,              // v6
+			400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v1
+
+			400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v1 (left)
+			400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,  -1, 0, 0,   1, 1, 1,              // v6
+			400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,  -1, 0, 0,   1, 1, 1,              // v7
+			400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v2
+
+			400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,   1, 1, 1,              // v7 (bottom)
+			400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,   1, 1, 1,              // v4
+			400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v3
+			400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v2
+
+			400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v4 (back)
+			400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v7
+			400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,   1, 1, 1,              // v6
+			400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,   1, 1, 1 };            // v5
+		memcpy(vertices6, verticesTemp6, sizeof(verticesTemp6));
+
+		barTemp = bars[7];
+
+		/*
+		glBegin(GL_QUADS);  //Rectangle drawing
+		// Will be using xp and yp as our changing x-position and y-position in our window
+		glVertex3f(400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0);	//475
+		glVertex3f(400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0);	//325
+		glVertex3f(400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0);
+		glVertex3f(400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0);
+
+		glEnd();
+		*/
+
+		GLfloat verticesTemp7[216] = { 400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v0 (front)
+			400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v1
+			400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,              // v2
+			400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,             // v3
+
+			400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   1, 0, 0,   1, 1, 1,              // v0 (right)
+			400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   1, 0, 0,   1, 1, 1,              // v3
+			400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   1, 0, 0,   1, 1, 1,              // v4
+			400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   1, 0, 0,   1, 1, 1,             // v5
+
+			400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v0 (top)
+			400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,  0, 1, 0,    1, 1, 1,              // v5
+			400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 1, 0,   1, 1, 1,              // v6
+			400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v1
+
+			400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v1 (left)
+			400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,  -1, 0, 0,   1, 1, 1,              // v6
+			400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,  -1, 0, 0,   1, 1, 1,              // v7
+			400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v2
+
+			400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,   1, 1, 1,              // v7 (bottom)
+			400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,   1, 1, 1,              // v4
+			400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v3
+			400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v2
+
+			400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v4 (back)
+			400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v7
+			400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,   1, 1, 1,              // v6
+			400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,   1, 1, 1 };            // v5
+		memcpy(vertices7, verticesTemp7, sizeof(verticesTemp7));
+
+		barTemp = bars[8];
+
+		/*
+		glBegin(GL_QUADS);  //Rectangle drawing
+		// Will be using xp and yp as our changing x-position and y-position in our window
+		glVertex3f(400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0);	//475
+		glVertex3f(400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0);	//325
+		glVertex3f(400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0);
+		glVertex3f(400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0);
+
+		glEnd();
+		*/
+
+		GLfloat verticesTemp8[216] = { 400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v0 (front)
+			400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v1
+			400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,              // v2
+			400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,             // v3
+
+			400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   1, 0, 0,   1, 1, 1,              // v0 (right)
+			400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   1, 0, 0,   1, 1, 1,              // v3
+			400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   1, 0, 0,   1, 1, 1,              // v4
+			400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   1, 0, 0,   1, 1, 1,             // v5
+
+			400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v0 (top)
+			400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,  0, 1, 0,    1, 1, 1,              // v5
+			400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 1, 0,   1, 1, 1,              // v6
+			400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v1
+
+			400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v1 (left)
+			400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,  -1, 0, 0,   1, 1, 1,              // v6
+			400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,  -1, 0, 0,   1, 1, 1,              // v7
+			400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v2
+
+			400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,   1, 1, 1,              // v7 (bottom)
+			400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,   1, 1, 1,              // v4
+			400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v3
+			400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v2
+
+			400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v4 (back)
+			400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v7
+			400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,   1, 1, 1,              // v6
+			400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,   1, 1, 1 };            // v5
+		memcpy(vertices8, verticesTemp8, sizeof(verticesTemp8));
+
+		barTemp = bars[9];
+
+		/*
+		glBegin(GL_QUADS);  //Rectangle drawing
+		// Will be using xp and yp as our changing x-position and y-position in our window
+		glVertex3f(400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0);	//475
+		glVertex3f(400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0);	//325
+		glVertex3f(400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0);
+		glVertex3f(400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0);
+
+		glEnd();
+		*/
+
+		GLfloat verticesTemp9[216] = { 400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v0 (front)
+			400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v1
+			400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,              // v2
+			400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,             // v3
+
+			400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   1, 0, 0,   1, 1, 1,              // v0 (right)
+			400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   1, 0, 0,   1, 1, 1,              // v3
+			400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   1, 0, 0,   1, 1, 1,              // v4
+			400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   1, 0, 0,   1, 1, 1,             // v5
+
+			400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v0 (top)
+			400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,  0, 1, 0,    1, 1, 1,              // v5
+			400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 1, 0,   1, 1, 1,              // v6
+			400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v1
+
+			400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v1 (left)
+			400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,  -1, 0, 0,   1, 1, 1,              // v6
+			400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,  -1, 0, 0,   1, 1, 1,              // v7
+			400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v2
+
+			400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,   1, 1, 1,              // v7 (bottom)
+			400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,   1, 1, 1,              // v4
+			400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v3
+			400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v2
+
+			400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v4 (back)
+			400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v7
+			400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,   1, 1, 1,              // v6
+			400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,   1, 1, 1 };            // v5
+		memcpy(vertices9, verticesTemp9, sizeof(verticesTemp9));
+
+		barTemp = bars[10];
+
+		/*
+		glBegin(GL_QUADS);  //Rectangle drawing
+		// Will be using xp and yp as our changing x-position and y-position in our window
+		glVertex3f(400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0);	//475
+		glVertex3f(400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0);	//325
+		glVertex3f(400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0);
+		glVertex3f(400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0);
+
+		glEnd();
+		*/
+
+		GLfloat verticesTemp10[216] = { 400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v0 (front)
+			400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v1
+			400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,              // v2
+			400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,             // v3
+
+			400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   1, 0, 0,   1, 1, 1,              // v0 (right)
+			400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   1, 0, 0,   1, 1, 1,              // v3
+			400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   1, 0, 0,   1, 1, 1,              // v4
+			400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   1, 0, 0,   1, 1, 1,             // v5
+
+			400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v0 (top)
+			400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,  0, 1, 0,    1, 1, 1,              // v5
+			400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 1, 0,   1, 1, 1,              // v6
+			400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v1
+
+			400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v1 (left)
+			400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,  -1, 0, 0,   1, 1, 1,              // v6
+			400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,  -1, 0, 0,   1, 1, 1,              // v7
+			400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v2
+
+			400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,   1, 1, 1,              // v7 (bottom)
+			400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,   1, 1, 1,              // v4
+			400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v3
+			400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v2
+
+			400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v4 (back)
+			400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v7
+			400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,   1, 1, 1,              // v6
+			400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,   1, 1, 1 };            // v5
+		memcpy(vertices10, verticesTemp10, sizeof(verticesTemp10));
+
+		barTemp = bars[11];
+
+		/*
+		glBegin(GL_QUADS);  //Rectangle drawing
+		// Will be using xp and yp as our changing x-position and y-position in our window
+		glVertex3f(400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0);	//475
+		glVertex3f(400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0);	//325
+		glVertex3f(400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0);
+		glVertex3f(400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0);
+
+		glEnd();
+		*/
+
+		GLfloat verticesTemp11[216] = { 400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v0 (front)
+			400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v1
+			400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,              // v2
+			400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,             // v3
+
+			400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   1, 0, 0,   1, 1, 1,              // v0 (right)
+			400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   1, 0, 0,   1, 1, 1,              // v3
+			400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   1, 0, 0,   1, 1, 1,              // v4
+			400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   1, 0, 0,   1, 1, 1,             // v5
+
+			400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v0 (top)
+			400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,  0, 1, 0,    1, 1, 1,              // v5
+			400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 1, 0,   1, 1, 1,              // v6
+			400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v1
+
+			400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v1 (left)
+			400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,  -1, 0, 0,   1, 1, 1,              // v6
+			400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,  -1, 0, 0,   1, 1, 1,              // v7
+			400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v2
+
+			400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,   1, 1, 1,              // v7 (bottom)
+			400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,   1, 1, 1,              // v4
+			400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v3
+			400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v2
+
+			400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v4 (back)
+			400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v7
+			400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,   1, 1, 1,              // v6
+			400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,   1, 1, 1 };            // v5
+		memcpy(vertices11, verticesTemp11, sizeof(verticesTemp11));
+
+		barTemp = bars[12];
+
+		/*
+		glBegin(GL_QUADS);  //Rectangle drawing
+		// Will be using xp and yp as our changing x-position and y-position in our window
+		glVertex3f(400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0);	//475
+		glVertex3f(400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0);	//325
+		glVertex3f(400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0);
+		glVertex3f(400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0);
+
+		glEnd();
+		*/
+
+		GLfloat verticesTemp12[216] = { 400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v0 (front)
+			400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v1
+			400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,              // v2
+			400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,             // v3
+
+			400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   1, 0, 0,   1, 1, 1,              // v0 (right)
+			400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   1, 0, 0,   1, 1, 1,              // v3
+			400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   1, 0, 0,   1, 1, 1,              // v4
+			400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   1, 0, 0,   1, 1, 1,             // v5
+
+			400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v0 (top)
+			400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,  0, 1, 0,    1, 1, 1,              // v5
+			400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 1, 0,   1, 1, 1,              // v6
+			400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v1
+
+			400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v1 (left)
+			400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,  -1, 0, 0,   1, 1, 1,              // v6
+			400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,  -1, 0, 0,   1, 1, 1,              // v7
+			400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v2
+
+			400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,   1, 1, 1,              // v7 (bottom)
+			400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,   1, 1, 1,              // v4
+			400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v3
+			400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v2
+
+			400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v4 (back)
+			400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v7
+			400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,   1, 1, 1,              // v6
+			400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,   1, 1, 1 };            // v5
+		memcpy(vertices12, verticesTemp12, sizeof(verticesTemp12));
+
+		barTemp = bars[13];
+
+		/*
+		glBegin(GL_QUADS);  //Rectangle drawing
+		// Will be using xp and yp as our changing x-position and y-position in our window
+		glVertex3f(400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0);	//475
+		glVertex3f(400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0);	//325
+		glVertex3f(400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0);
+		glVertex3f(400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0);
+
+		glEnd();
+		*/
+
+		GLfloat verticesTemp13[216] = { 400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v0 (front)
+			400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v1
+			400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,              // v2
+			400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,             // v3
+
+			400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   1, 0, 0,   1, 1, 1,              // v0 (right)
+			400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   1, 0, 0,   1, 1, 1,              // v3
+			400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   1, 0, 0,   1, 1, 1,              // v4
+			400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   1, 0, 0,   1, 1, 1,             // v5
+
+			400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v0 (top)
+			400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,  0, 1, 0,    1, 1, 1,              // v5
+			400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 1, 0,   1, 1, 1,              // v6
+			400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v1
+
+			400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v1 (left)
+			400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,  -1, 0, 0,   1, 1, 1,              // v6
+			400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,  -1, 0, 0,   1, 1, 1,              // v7
+			400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v2
+
+			400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,   1, 1, 1,              // v7 (bottom)
+			400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,   1, 1, 1,              // v4
+			400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v3
+			400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v2
+
+			400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v4 (back)
+			400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v7
+			400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,   1, 1, 1,              // v6
+			400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,   1, 1, 1 };            // v5
+		memcpy(vertices13, verticesTemp13, sizeof(verticesTemp13));
+
+		barTemp = bars[14];
+
+		/*
+		glBegin(GL_QUADS);  //Rectangle drawing
+		// Will be using xp and yp as our changing x-position and y-position in our window
+		glVertex3f(400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0);	//475
+		glVertex3f(400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0);	//325
+		glVertex3f(400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0);
+		glVertex3f(400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0);
+
+		glEnd();
+		*/
+
+		GLfloat verticesTemp14[216] = { 400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v0 (front)
+			400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v1
+			400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,              // v2
+			400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,             // v3
+
+			400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   1, 0, 0,   1, 1, 1,              // v0 (right)
+			400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   1, 0, 0,   1, 1, 1,              // v3
+			400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   1, 0, 0,   1, 1, 1,              // v4
+			400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   1, 0, 0,   1, 1, 1,             // v5
+
+			400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v0 (top)
+			400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,  0, 1, 0,    1, 1, 1,              // v5
+			400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 1, 0,   1, 1, 1,              // v6
+			400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v1
+
+			400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v1 (left)
+			400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,  -1, 0, 0,   1, 1, 1,              // v6
+			400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,  -1, 0, 0,   1, 1, 1,              // v7
+			400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v2
+
+			400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,   1, 1, 1,              // v7 (bottom)
+			400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,   1, 1, 1,              // v4
+			400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v3
+			400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v2
+
+			400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v4 (back)
+			400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v7
+			400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,   1, 1, 1,              // v6
+			400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,   1, 1, 1 };            // v5
+		memcpy(vertices14, verticesTemp14, sizeof(verticesTemp14));
+
+		barTemp = bars[15];
+
+		/*
+		glBegin(GL_QUADS);  //Rectangle drawing
+		// Will be using xp and yp as our changing x-position and y-position in our window
+		glVertex3f(400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0);	//475
+		glVertex3f(400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0);	//325
+		glVertex3f(400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0);
+		glVertex3f(400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0);
+
+		glEnd();
+		*/
+
+		GLfloat verticesTemp15[216] = { 400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v0 (front)
+			400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v1
+			400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,              // v2
+			400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,             // v3
+
+			400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   1, 0, 0,   1, 1, 1,              // v0 (right)
+			400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   1, 0, 0,   1, 1, 1,              // v3
+			400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   1, 0, 0,   1, 1, 1,              // v4
+			400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   1, 0, 0,   1, 1, 1,             // v5
+
+			400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v0 (top)
+			400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,  0, 1, 0,    1, 1, 1,              // v5
+			400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 1, 0,   1, 1, 1,              // v6
+			400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v1
+
+			400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v1 (left)
+			400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,  -1, 0, 0,   1, 1, 1,              // v6
+			400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,  -1, 0, 0,   1, 1, 1,              // v7
+			400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v2
+
+			400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,   1, 1, 1,              // v7 (bottom)
+			400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,   1, 1, 1,              // v4
+			400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v3
+			400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v2
+
+			400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v4 (back)
+			400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v7
+			400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,   1, 1, 1,              // v6
+			400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,   1, 1, 1 };            // v5
+		memcpy(vertices15, verticesTemp15, sizeof(verticesTemp15));
+
+		barTemp = bars[16];
+
+		/*
+		glBegin(GL_QUADS);  //Rectangle drawing
+		// Will be using xp and yp as our changing x-position and y-position in our window
+		glVertex3f(400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0);	//475
+		glVertex3f(400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0);	//325
+		glVertex3f(400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0);
+		glVertex3f(400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0);
+
+		glEnd();
+		*/
+
+		GLfloat verticesTemp16[216] = { 400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v0 (front)
+			400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v1
+			400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,              // v2
+			400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,             // v3
+
+			400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   1, 0, 0,   1, 1, 1,              // v0 (right)
+			400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   1, 0, 0,   1, 1, 1,              // v3
+			400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   1, 0, 0,   1, 1, 1,              // v4
+			400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   1, 0, 0,   1, 1, 1,             // v5
+
+			400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v0 (top)
+			400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,  0, 1, 0,    1, 1, 1,              // v5
+			400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 1, 0,   1, 1, 1,              // v6
+			400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v1
+
+			400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v1 (left)
+			400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,  -1, 0, 0,   1, 1, 1,              // v6
+			400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,  -1, 0, 0,   1, 1, 1,              // v7
+			400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v2
+
+			400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,   1, 1, 1,              // v7 (bottom)
+			400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,   1, 1, 1,              // v4
+			400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v3
+			400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v2
+
+			400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v4 (back)
+			400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v7
+			400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,   1, 1, 1,              // v6
+			400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,   1, 1, 1 };            // v5
+		memcpy(vertices16, verticesTemp16, sizeof(verticesTemp16));
+
+		barTemp = bars[17];
+
+		/*
+		glBegin(GL_QUADS);  //Rectangle drawing
+		// Will be using xp and yp as our changing x-position and y-position in our window
+		glVertex3f(400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0);	//475
+		glVertex3f(400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0);	//325
+		glVertex3f(400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0);
+		glVertex3f(400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0);
+
+		glEnd();
+		*/
+
+		GLfloat verticesTemp17[216] = { 400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v0 (front)
+			400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v1
+			400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,              // v2
+			400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,             // v3
+
+			400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   1, 0, 0,   1, 1, 1,              // v0 (right)
+			400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   1, 0, 0,   1, 1, 1,              // v3
+			400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   1, 0, 0,   1, 1, 1,              // v4
+			400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   1, 0, 0,   1, 1, 1,             // v5
+
+			400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v0 (top)
+			400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,  0, 1, 0,    1, 1, 1,              // v5
+			400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 1, 0,   1, 1, 1,              // v6
+			400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v1
+
+			400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v1 (left)
+			400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,  -1, 0, 0,   1, 1, 1,              // v6
+			400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,  -1, 0, 0,   1, 1, 1,              // v7
+			400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v2
+
+			400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,   1, 1, 1,              // v7 (bottom)
+			400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,   1, 1, 1,              // v4
+			400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v3
+			400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v2
+
+			400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v4 (back)
+			400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v7
+			400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,   1, 1, 1,              // v6
+			400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,   1, 1, 1 };            // v5
+		memcpy(vertices17, verticesTemp17, sizeof(verticesTemp17));
+		//printf("%f\n", lx);
+		//glEnd();
 	}
-
-	int barTemp = bars[0];
-	/*
-	glBegin(GL_QUADS);  //Rectangle drawing
-	// Will be using xp and yp as our changing x-position and y-position in our window
-	glVertex3f(400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0);	//475
-	glVertex3f(400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0);	//325
-	glVertex3f(400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0);
-	glVertex3f(400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0);
-
-	glEnd();
-	*/
-
-	GLfloat verticesTemp0[216] = { 400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0, 0, 0, 1, 1, 1, 1,              // v0 (front)
-		400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0, 0, 0, 1, 1, 1, 1,              // v1
-		400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0, 0, 0, 1, 1, 1, 1,              // v2
-		400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0, 0, 0, 1, 1, 1, 1,              // v3
-
-		400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0, 1, 0, 0, 1, 1, 1,              // v0 (right)
-		400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0, 1, 0, 0, 1, 1, 1,              // v3
-		400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10, 1, 0, 0, 1, 1, 1,              // v4
-		400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10, 1, 0, 0, 1, 1, 1,              // v5
-
-		400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0, 0, 1, 0, 1, 1, 1,              // v0 (top)
-		400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10, 0, 1, 0, 1, 1, 1,              // v5
-		400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10, 0, 1, 0, 1, 1, 1,              // v6
-		400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0, 0, 1, 0, 1, 1, 1,              // v1
-
-		400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0, -1, 0, 0, 1, 1, 1,              // v1 (left)
-		400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10, -1, 0, 0, 1, 1, 1,              // v6
-		400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10, -1, 0, 0, 1, 1, 1,              // v7
-		400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0, -1, 0, 0, 1, 1, 1,              // v2
-
-		400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10, 0, -1, 0, 1, 1, 1,              // v7 (bottom)
-		400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10, 0, -1, 0, 1, 1, 1,              // v4
-		400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0, 0, -1, 0, 1, 1, 1,              // v3
-		400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0, 0, -1, 0, 1, 1, 1,              // v2
-
-		400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10, 0, 0, -1, 1, 1, 1,              // v4 (back)
-		400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10, 0, 0, -1, 1, 1, 1,              // v7
-		400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10, 0, 0, -1, 1, 1, 1,              // v6
-		400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10, 0, 0, -1, 1, 1, 1 };            // v5
-	memcpy(vertices0, verticesTemp0, sizeof(verticesTemp0));
-
-	barTemp = bars[1];
-
-	/*
-	glBegin(GL_QUADS);  //Rectangle drawing
-	// Will be using xp and yp as our changing x-position and y-position in our window
-	glVertex3f(400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0);	//475
-	glVertex3f(400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0);	//325
-	glVertex3f(400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0);
-	glVertex3f(400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0);
-
-	glEnd();
-	*/
-
-	GLfloat verticesTemp1[216] = { 400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v0 (front)
-		400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v1
-		400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,              // v2
-		400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,              // v3
-
-		400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   1, 0, 0,   1, 1, 1,              // v0 (right)
-		400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   1, 0, 0,   1, 1, 1,              // v3
-		400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   1, 0, 0,   1, 1, 1,              // v4
-		400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   1, 0, 0,  1, 1, 1,              // v5
-
-		400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v0 (top)
-		400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,  0, 1, 0,   1, 1, 1,              // v5
-		400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 1, 0,   1, 1, 1,              // v6
-		400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v1
-
-		400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v1 (left)
-		400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,  -1, 0, 0,  1, 1, 1,              // v6
-		400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,  -1, 0, 0,   1, 1, 1,              // v7
-		400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v2
-
-		400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,  1, 1, 1,              // v7 (bottom)
-		400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,   1, 1, 1,              // v4
-		400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v3
-		400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v2
-
-		400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v4 (back)
-		400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v7
-		400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,  1, 1, 1,              // v6
-		400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,  1, 1, 1 };            // v5
-	memcpy(vertices1, verticesTemp1, sizeof(verticesTemp1));
-
-	barTemp = bars[2];
-
-	/*
-	glBegin(GL_QUADS);  //Rectangle drawing
-	// Will be using xp and yp as our changing x-position and y-position in our window
-	glVertex3f(400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0);	//475
-	glVertex3f(400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0);	//325
-	glVertex3f(400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0);
-	glVertex3f(400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0);
-
-	glEnd();
-	*/
-
-	GLfloat verticesTemp2[216] = { 400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v0 (front)
-		400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v1
-		400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,  1, 1, 1,              // v2
-		400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,              // v3
-
-		400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   1, 0, 0,   1, 1, 1,              // v0 (right)
-		400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   1, 0, 0,  1, 1, 1,              // v3
-		400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   1, 0, 0,   1, 1, 1,              // v4
-		400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   1, 0, 0,   1, 1, 1,              // v5
-
-		400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v0 (top)
-		400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,  0, 1, 0,    1, 1, 1,              // v5
-		400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 1, 0,   1, 1, 1,              // v6
-		400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v1
-
-		400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v1 (left)
-		400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,  -1, 0, 0,   1, 1, 1,              // v6
-		400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,  -1, 0, 0,  1, 1, 1,              // v7
-		400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,  -1, 0, 0,  1, 1, 1,              // v2
-
-		400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,  1, 1, 1,              // v7 (bottom)
-		400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,  1, 1, 1,              // v4
-		400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v3
-		400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v2
-
-		400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v4 (back)
-		400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v7
-		400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,   1, 1, 1,              // v6
-		400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,   1, 1, 1 };            // v5
-	memcpy(vertices2, verticesTemp2, sizeof(verticesTemp2));
-
-	barTemp = bars[3];
-
-	/*
-	glBegin(GL_QUADS);  //Rectangle drawing
-	// Will be using xp and yp as our changing x-position and y-position in our window
-	glVertex3f(400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0);	//475
-	glVertex3f(400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0);	//325
-	glVertex3f(400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0);
-	glVertex3f(400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0);
-
-	glEnd();
-	*/
-
-	GLfloat verticesTemp3[216] = { 400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v0 (front)
-		400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v1
-		400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,             // v2
-		400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,              // v3
-
-		400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   1, 0, 0,   1, 1, 1,              // v0 (right)
-		400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   1, 0, 0,   1, 1, 1,              // v3
-		400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   1, 0, 0,   1, 1, 1,              // v4
-		400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   1, 0, 0,   1, 1, 1,              // v5
-
-		400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v0 (top)
-		400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,  0, 1, 0,   1, 1, 1,              // v5
-		400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 1, 0,  1, 1, 1,              // v6
-		400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v1
-
-		400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v1 (left)
-		400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,  -1, 0, 0,   1, 1, 1,              // v6
-		400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,  -1, 0, 0,   1, 1, 1,              // v7
-		400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v2
-
-		400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,  1, 1, 1,              // v7 (bottom)
-		400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,   1, 1, 1,              // v4
-		400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,             // v3
-		400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v2
-
-		400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v4 (back)
-		400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v7
-		400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,   1, 1, 1,              // v6
-		400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,   1, 1, 1 };            // v5
-	memcpy(vertices3, verticesTemp3, sizeof(verticesTemp3));
-
-	barTemp = bars[4];
-
-	/*
-	glBegin(GL_QUADS);  //Rectangle drawing
-	// Will be using xp and yp as our changing x-position and y-position in our window
-	glVertex3f(400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0);	//475
-	glVertex3f(400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0);	//325
-	glVertex3f(400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0);
-	glVertex3f(400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0);
-
-	glEnd();
-	*/
-
-	GLfloat verticesTemp4[216] = { 400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v0 (front)
-		400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v1
-		400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,              // v2
-		400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,             // v3
-
-		400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   1, 0, 0,   1, 1, 1,              // v0 (right)
-		400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   1, 0, 0,   1, 1, 1,              // v3
-		400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   1, 0, 0,   1, 1, 1,              // v4
-		400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   1, 0, 0,   1, 1, 1,             // v5
-
-		400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v0 (top)
-		400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,  0, 1, 0,    1, 1, 1,              // v5
-		400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 1, 0,   1, 1, 1,              // v6
-		400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v1
-
-		400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v1 (left)
-		400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,  -1, 0, 0,   1, 1, 1,              // v6
-		400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,  -1, 0, 0,   1, 1, 1,              // v7
-		400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v2
-
-		400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,   1, 1, 1,              // v7 (bottom)
-		400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,   1, 1, 1,              // v4
-		400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v3
-		400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v2
-
-		400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v4 (back)
-		400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v7
-		400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,   1, 1, 1,              // v6
-		400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,   1, 1, 1 };            // v5
-	memcpy(vertices4, verticesTemp4, sizeof(verticesTemp4));
-
-	barTemp = bars[5];
-
-	/*
-	glBegin(GL_QUADS);  //Rectangle drawing
-	// Will be using xp and yp as our changing x-position and y-position in our window
-	glVertex3f(400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0);	//475
-	glVertex3f(400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0);	//325
-	glVertex3f(400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0);
-	glVertex3f(400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0);
-
-	glEnd();
-	*/
-
-	GLfloat verticesTemp5[216] = { 400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v0 (front)
-		400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v1
-		400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,              // v2
-		400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,             // v3
-
-		400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   1, 0, 0,   1, 1, 1,              // v0 (right)
-		400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   1, 0, 0,   1, 1, 1,              // v3
-		400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   1, 0, 0,   1, 1, 1,              // v4
-		400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   1, 0, 0,   1, 1, 1,             // v5
-
-		400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v0 (top)
-		400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,  0, 1, 0,    1, 1, 1,              // v5
-		400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 1, 0,   1, 1, 1,              // v6
-		400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v1
-
-		400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v1 (left)
-		400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,  -1, 0, 0,   1, 1, 1,              // v6
-		400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,  -1, 0, 0,   1, 1, 1,              // v7
-		400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v2
-
-		400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,   1, 1, 1,              // v7 (bottom)
-		400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,   1, 1, 1,              // v4
-		400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v3
-		400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v2
-
-		400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v4 (back)
-		400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v7
-		400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,   1, 1, 1,              // v6
-		400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,   1, 1, 1 };            // v5
-	memcpy(vertices5, verticesTemp5, sizeof(verticesTemp5));
-
-	barTemp = bars[6];
-
-	/*
-	glBegin(GL_QUADS);  //Rectangle drawing
-	// Will be using xp and yp as our changing x-position and y-position in our window
-	glVertex3f(400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0);	//475
-	glVertex3f(400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0);	//325
-	glVertex3f(400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0);
-	glVertex3f(400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0);
-
-	glEnd();
-	*/
-
-	GLfloat verticesTemp6[216] = { 400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v0 (front)
-		400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v1
-		400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,              // v2
-		400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,             // v3
-
-		400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   1, 0, 0,   1, 1, 1,              // v0 (right)
-		400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   1, 0, 0,   1, 1, 1,              // v3
-		400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   1, 0, 0,   1, 1, 1,              // v4
-		400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   1, 0, 0,   1, 1, 1,             // v5
-
-		400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v0 (top)
-		400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,  0, 1, 0,    1, 1, 1,              // v5
-		400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 1, 0,   1, 1, 1,              // v6
-		400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v1
-
-		400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v1 (left)
-		400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,  -1, 0, 0,   1, 1, 1,              // v6
-		400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,  -1, 0, 0,   1, 1, 1,              // v7
-		400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v2
-
-		400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,   1, 1, 1,              // v7 (bottom)
-		400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,   1, 1, 1,              // v4
-		400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v3
-		400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v2
-
-		400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v4 (back)
-		400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v7
-		400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,   1, 1, 1,              // v6
-		400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,   1, 1, 1 };            // v5
-	memcpy(vertices6, verticesTemp6, sizeof(verticesTemp6));
-
-	barTemp = bars[7];
-
-	/*
-	glBegin(GL_QUADS);  //Rectangle drawing
-	// Will be using xp and yp as our changing x-position and y-position in our window
-	glVertex3f(400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0);	//475
-	glVertex3f(400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0);	//325
-	glVertex3f(400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0);
-	glVertex3f(400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0);
-
-	glEnd();
-	*/
-
-	GLfloat verticesTemp7[216] = { 400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v0 (front)
-		400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v1
-		400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,              // v2
-		400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,             // v3
-
-		400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   1, 0, 0,   1, 1, 1,              // v0 (right)
-		400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   1, 0, 0,   1, 1, 1,              // v3
-		400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   1, 0, 0,   1, 1, 1,              // v4
-		400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   1, 0, 0,   1, 1, 1,             // v5
-
-		400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v0 (top)
-		400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,  0, 1, 0,    1, 1, 1,              // v5
-		400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 1, 0,   1, 1, 1,              // v6
-		400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v1
-
-		400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v1 (left)
-		400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,  -1, 0, 0,   1, 1, 1,              // v6
-		400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,  -1, 0, 0,   1, 1, 1,              // v7
-		400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v2
-
-		400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,   1, 1, 1,              // v7 (bottom)
-		400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,   1, 1, 1,              // v4
-		400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v3
-		400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v2
-
-		400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v4 (back)
-		400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v7
-		400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,   1, 1, 1,              // v6
-		400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,   1, 1, 1 };            // v5
-	memcpy(vertices7, verticesTemp7, sizeof(verticesTemp7));
-
-	barTemp = bars[8];
-
-	/*
-	glBegin(GL_QUADS);  //Rectangle drawing
-	// Will be using xp and yp as our changing x-position and y-position in our window
-	glVertex3f(400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0);	//475
-	glVertex3f(400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0);	//325
-	glVertex3f(400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0);
-	glVertex3f(400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0);
-
-	glEnd();
-	*/
-
-	GLfloat verticesTemp8[216] = { 400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v0 (front)
-		400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v1
-		400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,              // v2
-		400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,             // v3
-
-		400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   1, 0, 0,   1, 1, 1,              // v0 (right)
-		400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   1, 0, 0,   1, 1, 1,              // v3
-		400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   1, 0, 0,   1, 1, 1,              // v4
-		400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   1, 0, 0,   1, 1, 1,             // v5
-
-		400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v0 (top)
-		400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,  0, 1, 0,    1, 1, 1,              // v5
-		400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 1, 0,   1, 1, 1,              // v6
-		400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v1
-
-		400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v1 (left)
-		400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,  -1, 0, 0,   1, 1, 1,              // v6
-		400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,  -1, 0, 0,   1, 1, 1,              // v7
-		400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v2
-
-		400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,   1, 1, 1,              // v7 (bottom)
-		400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,   1, 1, 1,              // v4
-		400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v3
-		400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v2
-
-		400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v4 (back)
-		400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v7
-		400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,   1, 1, 1,              // v6
-		400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,   1, 1, 1 };            // v5
-	memcpy(vertices8, verticesTemp8, sizeof(verticesTemp8));
-
-	barTemp = bars[9];
-
-	/*
-	glBegin(GL_QUADS);  //Rectangle drawing
-	// Will be using xp and yp as our changing x-position and y-position in our window
-	glVertex3f(400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0);	//475
-	glVertex3f(400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0);	//325
-	glVertex3f(400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0);
-	glVertex3f(400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0);
-
-	glEnd();
-	*/
-
-	GLfloat verticesTemp9[216] = { 400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v0 (front)
-		400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v1
-		400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,              // v2
-		400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,             // v3
-
-		400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   1, 0, 0,   1, 1, 1,              // v0 (right)
-		400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   1, 0, 0,   1, 1, 1,              // v3
-		400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   1, 0, 0,   1, 1, 1,              // v4
-		400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   1, 0, 0,   1, 1, 1,             // v5
-
-		400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v0 (top)
-		400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,  0, 1, 0,    1, 1, 1,              // v5
-		400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 1, 0,   1, 1, 1,              // v6
-		400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v1
-
-		400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v1 (left)
-		400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,  -1, 0, 0,   1, 1, 1,              // v6
-		400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,  -1, 0, 0,   1, 1, 1,              // v7
-		400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v2
-
-		400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,   1, 1, 1,              // v7 (bottom)
-		400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,   1, 1, 1,              // v4
-		400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v3
-		400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v2
-
-		400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v4 (back)
-		400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v7
-		400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,   1, 1, 1,              // v6
-		400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,   1, 1, 1 };            // v5
-	memcpy(vertices9, verticesTemp9, sizeof(verticesTemp9));
-
-	barTemp = bars[10];
-
-	/*
-	glBegin(GL_QUADS);  //Rectangle drawing
-	// Will be using xp and yp as our changing x-position and y-position in our window
-	glVertex3f(400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0);	//475
-	glVertex3f(400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0);	//325
-	glVertex3f(400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0);
-	glVertex3f(400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0);
-
-	glEnd();
-	*/
-
-	GLfloat verticesTemp10[216] = { 400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v0 (front)
-		400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v1
-		400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,              // v2
-		400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,             // v3
-
-		400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   1, 0, 0,   1, 1, 1,              // v0 (right)
-		400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   1, 0, 0,   1, 1, 1,              // v3
-		400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   1, 0, 0,   1, 1, 1,              // v4
-		400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   1, 0, 0,   1, 1, 1,             // v5
-
-		400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v0 (top)
-		400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,  0, 1, 0,    1, 1, 1,              // v5
-		400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 1, 0,   1, 1, 1,              // v6
-		400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v1
-
-		400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v1 (left)
-		400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,  -1, 0, 0,   1, 1, 1,              // v6
-		400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,  -1, 0, 0,   1, 1, 1,              // v7
-		400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v2
-
-		400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,   1, 1, 1,              // v7 (bottom)
-		400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,   1, 1, 1,              // v4
-		400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v3
-		400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v2
-
-		400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v4 (back)
-		400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v7
-		400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,   1, 1, 1,              // v6
-		400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,   1, 1, 1 };            // v5
-	memcpy(vertices10, verticesTemp10, sizeof(verticesTemp10));
-
-	barTemp = bars[11];
-
-	/*
-	glBegin(GL_QUADS);  //Rectangle drawing
-	// Will be using xp and yp as our changing x-position and y-position in our window
-	glVertex3f(400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0);	//475
-	glVertex3f(400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0);	//325
-	glVertex3f(400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0);
-	glVertex3f(400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0);
-
-	glEnd();
-	*/
-
-	GLfloat verticesTemp11[216] = { 400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v0 (front)
-		400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v1
-		400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,              // v2
-		400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,             // v3
-
-		400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   1, 0, 0,   1, 1, 1,              // v0 (right)
-		400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   1, 0, 0,   1, 1, 1,              // v3
-		400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   1, 0, 0,   1, 1, 1,              // v4
-		400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   1, 0, 0,   1, 1, 1,             // v5
-
-		400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v0 (top)
-		400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,  0, 1, 0,    1, 1, 1,              // v5
-		400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 1, 0,   1, 1, 1,              // v6
-		400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v1
-
-		400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v1 (left)
-		400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,  -1, 0, 0,   1, 1, 1,              // v6
-		400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,  -1, 0, 0,   1, 1, 1,              // v7
-		400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v2
-
-		400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,   1, 1, 1,              // v7 (bottom)
-		400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,   1, 1, 1,              // v4
-		400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v3
-		400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v2
-
-		400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v4 (back)
-		400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v7
-		400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,   1, 1, 1,              // v6
-		400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,   1, 1, 1 };            // v5
-	memcpy(vertices11, verticesTemp11, sizeof(verticesTemp11));
-
-	barTemp = bars[12];
-
-	/*
-	glBegin(GL_QUADS);  //Rectangle drawing
-	// Will be using xp and yp as our changing x-position and y-position in our window
-	glVertex3f(400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0);	//475
-	glVertex3f(400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0);	//325
-	glVertex3f(400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0);
-	glVertex3f(400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0);
-
-	glEnd();
-	*/
-
-	GLfloat verticesTemp12[216] = { 400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v0 (front)
-		400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v1
-		400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,              // v2
-		400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,             // v3
-
-		400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   1, 0, 0,   1, 1, 1,              // v0 (right)
-		400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   1, 0, 0,   1, 1, 1,              // v3
-		400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   1, 0, 0,   1, 1, 1,              // v4
-		400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   1, 0, 0,   1, 1, 1,             // v5
-
-		400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v0 (top)
-		400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,  0, 1, 0,    1, 1, 1,              // v5
-		400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 1, 0,   1, 1, 1,              // v6
-		400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v1
-
-		400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v1 (left)
-		400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,  -1, 0, 0,   1, 1, 1,              // v6
-		400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,  -1, 0, 0,   1, 1, 1,              // v7
-		400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v2
-
-		400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,   1, 1, 1,              // v7 (bottom)
-		400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,   1, 1, 1,              // v4
-		400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v3
-		400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v2
-
-		400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v4 (back)
-		400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v7
-		400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,   1, 1, 1,              // v6
-		400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,   1, 1, 1 };            // v5
-	memcpy(vertices12, verticesTemp12, sizeof(verticesTemp12));
-
-	barTemp = bars[13];
-
-	/*
-	glBegin(GL_QUADS);  //Rectangle drawing
-	// Will be using xp and yp as our changing x-position and y-position in our window
-	glVertex3f(400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0);	//475
-	glVertex3f(400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0);	//325
-	glVertex3f(400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0);
-	glVertex3f(400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0);
-
-	glEnd();
-	*/
-
-	GLfloat verticesTemp13[216] = { 400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v0 (front)
-		400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v1
-		400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,              // v2
-		400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,             // v3
-
-		400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   1, 0, 0,   1, 1, 1,              // v0 (right)
-		400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   1, 0, 0,   1, 1, 1,              // v3
-		400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   1, 0, 0,   1, 1, 1,              // v4
-		400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   1, 0, 0,   1, 1, 1,             // v5
-
-		400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v0 (top)
-		400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,  0, 1, 0,    1, 1, 1,              // v5
-		400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 1, 0,   1, 1, 1,              // v6
-		400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v1
-
-		400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v1 (left)
-		400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,  -1, 0, 0,   1, 1, 1,              // v6
-		400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,  -1, 0, 0,   1, 1, 1,              // v7
-		400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v2
-
-		400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,   1, 1, 1,              // v7 (bottom)
-		400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,   1, 1, 1,              // v4
-		400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v3
-		400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v2
-
-		400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v4 (back)
-		400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v7
-		400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,   1, 1, 1,              // v6
-		400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,   1, 1, 1 };            // v5
-	memcpy(vertices13, verticesTemp13, sizeof(verticesTemp13));
-
-	barTemp = bars[14];
-
-	/*
-	glBegin(GL_QUADS);  //Rectangle drawing
-	// Will be using xp and yp as our changing x-position and y-position in our window
-	glVertex3f(400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0);	//475
-	glVertex3f(400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0);	//325
-	glVertex3f(400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0);
-	glVertex3f(400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0);
-
-	glEnd();
-	*/
-
-	GLfloat verticesTemp14[216] = { 400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v0 (front)
-		400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v1
-		400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,              // v2
-		400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,             // v3
-
-		400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   1, 0, 0,   1, 1, 1,              // v0 (right)
-		400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   1, 0, 0,   1, 1, 1,              // v3
-		400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   1, 0, 0,   1, 1, 1,              // v4
-		400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   1, 0, 0,   1, 1, 1,             // v5
-
-		400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v0 (top)
-		400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,  0, 1, 0,    1, 1, 1,              // v5
-		400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 1, 0,   1, 1, 1,              // v6
-		400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v1
-
-		400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v1 (left)
-		400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,  -1, 0, 0,   1, 1, 1,              // v6
-		400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,  -1, 0, 0,   1, 1, 1,              // v7
-		400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v2
-
-		400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,   1, 1, 1,              // v7 (bottom)
-		400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,   1, 1, 1,              // v4
-		400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v3
-		400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v2
-
-		400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v4 (back)
-		400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v7
-		400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,   1, 1, 1,              // v6
-		400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,   1, 1, 1 };            // v5
-	memcpy(vertices14, verticesTemp14, sizeof(verticesTemp14));
-
-	barTemp = bars[15];
-
-	/*
-	glBegin(GL_QUADS);  //Rectangle drawing
-	// Will be using xp and yp as our changing x-position and y-position in our window
-	glVertex3f(400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0);	//475
-	glVertex3f(400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0);	//325
-	glVertex3f(400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0);
-	glVertex3f(400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0);
-
-	glEnd();
-	*/
-
-	GLfloat verticesTemp15[216] = { 400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v0 (front)
-		400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v1
-		400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,              // v2
-		400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,             // v3
-
-		400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   1, 0, 0,   1, 1, 1,              // v0 (right)
-		400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   1, 0, 0,   1, 1, 1,              // v3
-		400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   1, 0, 0,   1, 1, 1,              // v4
-		400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   1, 0, 0,   1, 1, 1,             // v5
-
-		400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v0 (top)
-		400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,  0, 1, 0,    1, 1, 1,              // v5
-		400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 1, 0,   1, 1, 1,              // v6
-		400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v1
-
-		400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v1 (left)
-		400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,  -1, 0, 0,   1, 1, 1,              // v6
-		400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,  -1, 0, 0,   1, 1, 1,              // v7
-		400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v2
-
-		400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,   1, 1, 1,              // v7 (bottom)
-		400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,   1, 1, 1,              // v4
-		400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v3
-		400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v2
-
-		400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v4 (back)
-		400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v7
-		400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,   1, 1, 1,              // v6
-		400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,   1, 1, 1 };            // v5
-	memcpy(vertices15, verticesTemp15, sizeof(verticesTemp15));
-
-	barTemp = bars[16];
-
-	/*
-	glBegin(GL_QUADS);  //Rectangle drawing
-	// Will be using xp and yp as our changing x-position and y-position in our window
-	glVertex3f(400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0);	//475
-	glVertex3f(400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0);	//325
-	glVertex3f(400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0);
-	glVertex3f(400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0);
-
-	glEnd();
-	*/
-
-	GLfloat verticesTemp16[216] = { 400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v0 (front)
-		400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v1
-		400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,              // v2
-		400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,             // v3
-
-		400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   1, 0, 0,   1, 1, 1,              // v0 (right)
-		400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   1, 0, 0,   1, 1, 1,              // v3
-		400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   1, 0, 0,   1, 1, 1,              // v4
-		400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   1, 0, 0,   1, 1, 1,             // v5
-
-		400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v0 (top)
-		400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,  0, 1, 0,    1, 1, 1,              // v5
-		400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 1, 0,   1, 1, 1,              // v6
-		400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v1
-
-		400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v1 (left)
-		400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,  -1, 0, 0,   1, 1, 1,              // v6
-		400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,  -1, 0, 0,   1, 1, 1,              // v7
-		400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v2
-
-		400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,   1, 1, 1,              // v7 (bottom)
-		400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,   1, 1, 1,              // v4
-		400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v3
-		400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v2
-
-		400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v4 (back)
-		400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v7
-		400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,   1, 1, 1,              // v6
-		400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,   1, 1, 1 };            // v5
-	memcpy(vertices16, verticesTemp16, sizeof(verticesTemp16));
-
-	barTemp = bars[17];
-
-	/*
-	glBegin(GL_QUADS);  //Rectangle drawing
-	// Will be using xp and yp as our changing x-position and y-position in our window
-	glVertex3f(400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0);	//475
-	glVertex3f(400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0);	//325
-	glVertex3f(400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0);
-	glVertex3f(400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0);
-
-	glEnd();
-	*/
-
-	GLfloat verticesTemp17[216] = { 400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v0 (front)
-		400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v1
-		400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,              // v2
-		400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,             // v3
-
-		400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   1, 0, 0,   1, 1, 1,              // v0 (right)
-		400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   1, 0, 0,   1, 1, 1,              // v3
-		400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   1, 0, 0,   1, 1, 1,              // v4
-		400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   1, 0, 0,   1, 1, 1,             // v5
-
-		400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v0 (top)
-		400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,  0, 1, 0,    1, 1, 1,              // v5
-		400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 1, 0,   1, 1, 1,              // v6
-		400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v1
-
-		400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v1 (left)
-		400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,  -1, 0, 0,   1, 1, 1,              // v6
-		400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,  -1, 0, 0,   1, 1, 1,              // v7
-		400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v2
-
-		400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,   1, 1, 1,              // v7 (bottom)
-		400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,   1, 1, 1,              // v4
-		400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v3
-		400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v2
-
-		400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v4 (back)
-		400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v7
-		400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,   1, 1, 1,              // v6
-		400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,   1, 1, 1 };            // v5
-	memcpy(vertices17, verticesTemp17, sizeof(verticesTemp17));
-	//printf("%f\n", lx);
-
-	//glEnd();
 
 	draw0();
 	draw1();
@@ -2134,6 +2699,9 @@ void speedManager(void) {
 		//aggrlx += lx * (double(delta_t) / double(fps_frames))c / 1000;
 		if (drifting) {
 			xp += driftVel;
+		}
+		else if (spinning) {
+			xp = -sinf(((float)it / (float)(delay / 2)) * (float)PI) * boost / 2.0;
 		}
 		else {
 			xp = -sinf(((float)it / (float)(delay / 2)) * (float)PI) * boost;
@@ -2341,21 +2909,24 @@ void letter_pressed(unsigned char key, int x, int y) {
 		glutPostRedisplay();
 		break;
 	case 50: //2 will make stimulus 5-bar grate
-		bars[0] = -28;
-		bars[1] = -24;
-		bars[2] = -20;
-		bars[3] = -16;
-		bars[4] = -12;
-		bars[5] = -8;
-		bars[6] = -4;
-		bars[7] = 0;
-		bars[8] = 4;
-		bars[9] = 8;
-		bars[10] = 12;
-		bars[11] = 16;
-		bars[12] = 20;
-		bars[13] = 24;
-		bars[14] = 28;
+		bars[0] = -32;
+		bars[1] = -28;
+		bars[2] = -24;
+		bars[3] = -20;
+		bars[4] = -16;
+		bars[5] = -12;
+		bars[6] = -8;
+		bars[7] = -4;
+		bars[8] = 0;
+		bars[9] = 4;
+		bars[10] = 8;
+		bars[11] = 12;
+		bars[12] = 16;
+		bars[13] = 20;
+		bars[14] = 24;
+		bars[15] = 28;
+		bars[16] = 32;
+		bars[17] = 36;
 		glutPostRedisplay();
 		break;
 	case 86: //V will request viewing angle
@@ -2447,6 +3018,26 @@ void letter_pressed(unsigned char key, int x, int y) {
 		horizontal = 0;
 		//barwidth = barwidthArr[barwidthIt];
 		glutPostRedisplay();
+		break;
+	case 83: //S will make spinny stuff
+		if (spinning) {
+			spinning = 0;
+			printf("\nNot spinning.");
+		}
+		else {
+			spinning = 1;
+			printf("\nSpinning.");
+		}
+		break;
+	case 115: //s will make spinny stuff
+		if (spinning) {
+			spinning = 0;
+			printf("\nNot spinning.");
+		}
+		else {
+			spinning = 1;
+			printf("\nSpinning.");
+		}
 		break;
 	}
 }
