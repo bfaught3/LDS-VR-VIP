@@ -2175,8 +2175,8 @@ void speedManager(void) {
 		}
 		else if (calcFeedback() * calcFeedback() < 5 && abs(calcFeedback()) > threshold && closedLoop) { // Do something to catch the NaN problem
 			//lx = calcFeedback();
-			//lx += calcFeedback()/moth's weight in kg * 1574.80315 pixels/m * read * 1.0/10000.0 * 1.0/250.0;
-			lx += (float)(calcFeedback() / (weight)) * width * read * (1.0f / 10000.0f) * (1.0f / 250.0f);
+			//lx += calcFeedback()/moth's weight in kg * 1574.80315 pixels/m * read * 1.0/10000.0 * 1.0/120.0;
+			lx += (float)(calcFeedback() / (weight)) * width * read * (1.0f / 10000.0f) * (1.0f / 120.0f);
 		}
 		//aggrlx += lx;
 		//aggrlx += lx * (double(delta_t) / double(fps_frames)) / 1000;
