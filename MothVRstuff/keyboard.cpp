@@ -25,7 +25,7 @@
 #include <windows.h>
 #include "wglext.h"
 //#include <string.h>
-#include <GL/glui.h>
+//#include <GL/glui.h>
 
 
 
@@ -59,10 +59,10 @@ float barwidth = barwidthArr[barwidthIt];
 //int bars[5] = { -8, -4, 0, 4, 8 };	//These should (increment or decrement) by 20 when the bars go too far off the screen.
 //bool isRight[5] = { false, false, false, false, true }; //This keeps track of the rightmost bar
 //bool isLeft[5] = { true, false, false, false, false }; //This keeps track of the leftmost bar
-int bars[15] = { -28, -24, -20, -16, -12, -8, -4, 0, 4, 8, 12, 16, 20, 24, 28 };
+int bars[18] = { -32, -28, -24, -20, -16, -12, -8, -4, 0, 4, 8, 12, 16, 20, 24, 28, 32, 36 };
 
-bool isRight[15] = { false, false, false, false, false, false, false, false, false, false, false, false, false, false, true }; //This keeps track of the rightmost bar
-bool isLeft[15] = { true, false, false, false, false, false, false, false, false, false, false, false, false, false, false }; //This keeps track of the leftmost bar
+bool isRight[18] = { false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true }; //This keeps track of the rightmost bar
+bool isLeft[18] = { true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false }; //This keeps track of the leftmost bar
 
 // angle of rotation for the camera direction
 float angle = 0.0;
@@ -73,6 +73,7 @@ float x = 0.0f, z = 0.0f;
 float aggrlx = 0.0f;
 bool clear = 0;
 bool centering = 0;
+bool centered = 0;
 bool written = 0;
 // for NIDAQ data handling
 int32       error = 0;
@@ -97,6 +98,10 @@ char        errBuff[2048] = { '\0' };
 bool rebias = 1;
 bool drifting = 0; //False if sinusoidal motion is active, true if velocity drift is active.
 float driftVel = 0;
+bool closedLoop = 0;
+bool horizontal = 0; //True if stimuli are horizontal bars.
+bool spinning = 0; //True if stimuli are spinning spokes.
+float viewingAngle = 5; //This viewing angle will be used for the spokes.
 
 GLfloat vertices0[] = { 400 + (-8 + 1) * barwidth + xp, 800 + yp, 0, 0, 0, 1, 1, 1, 1,              // v0 (front)
 400 + (-8 - 1) * barwidth + xp, 800 + yp, 0, 0, 0, 1, 1, 1, 1,              // v1
@@ -533,6 +538,93 @@ GLfloat vertices14[] = { 400 + (-8 + 1) * barwidth + xp, 800 + yp, 0, 0, 0, 1, 1
 400 + (-8 - 1) * barwidth + xp, 0 + yp, -10, 0, 0, -1, 1, 1, 1,              // v7
 400 + (-8 - 1) * barwidth + xp, 800 + yp, -10, 0, 0, -1, 1, 1, 1,              // v6
 400 + (-8 + 1) * barwidth + xp, 800 + yp, -10, 0, 0, -1, 1, 1, 1 };            // v5
+GLfloat vertices15[] = { 400 + (-8 + 1) * barwidth + xp, 800 + yp, 0, 0, 0, 1, 1, 1, 1,              // v0 (front)
+400 + (-8 - 1) * barwidth + xp, 800 + yp, 0, 0, 0, 1, 1, 1, 1,              // v1
+400 + (-8 - 1) * barwidth + xp, 0 + yp, 0, 0, 0, 1, 1, 1, 1,              // v2
+400 + (-8 + 1) * barwidth + xp, 0 + yp, 0, 0, 0, 1, 1, 1, 1,              // v3
+
+400 + (-8 + 1) * barwidth + xp, 800 + yp, 0, 1, 0, 0, 1, 1, 1,              // v0 (right)
+400 + (-8 + 1) * barwidth + xp, 0 + yp, 0, 1, 0, 0, 1, 1, 1,              // v3
+400 + (-8 + 1) * barwidth + xp, 0 + yp, -10, 1, 0, 0, 1, 1, 1,              // v4
+400 + (-8 + 1) * barwidth + xp, 800 + yp, -10, 1, 0, 0, 1, 1, 1,              // v5
+
+400 + (-8 + 1) * barwidth + xp, 800 + yp, 0, 0, 1, 0, 1, 1, 1,              // v0 (top)
+400 + (-8 + 1) * barwidth + xp, 800 + yp, -10, 0, 1, 0, 1, 1, 1,              // v5
+400 + (-8 - 1) * barwidth + xp, 800 + yp, -10, 0, 1, 0, 1, 1, 1,              // v6
+400 + (-8 - 1) * barwidth + xp, 800 + yp, 0, 0, 1, 0, 1, 1, 1,              // v1
+
+400 + (-8 - 1) * barwidth + xp, 800 + yp, 0, -1, 0, 0, 1, 1, 1,              // v1 (left)
+400 + (-8 - 1) * barwidth + xp, 800 + yp, -10, -1, 0, 0, 1, 1, 1,              // v6
+400 + (-8 - 1) * barwidth + xp, 0 + yp, -10, -1, 0, 0, 1, 1, 1,              // v7
+400 + (-8 - 1) * barwidth + xp, 0 + yp, 0, -1, 0, 0, 1, 1, 1,              // v2
+
+400 + (-8 - 1) * barwidth + xp, 0 + yp, -10, 0, -1, 0, 1, 1, 1,              // v7 (bottom)
+400 + (-8 + 1) * barwidth + xp, 0 + yp, -10, 0, -1, 0, 1, 1, 1,              // v4
+400 + (-8 + 1) * barwidth + xp, 0 + yp, 0, 0, -1, 0, 1, 1, 1,              // v3
+400 + (-8 - 1) * barwidth + xp, 0 + yp, 0, 0, -1, 0, 1, 1, 1,              // v2
+
+400 + (-8 + 1) * barwidth + xp, 0 + yp, -10, 0, 0, -1, 1, 1, 1,              // v4 (back)
+400 + (-8 - 1) * barwidth + xp, 0 + yp, -10, 0, 0, -1, 1, 1, 1,              // v7
+400 + (-8 - 1) * barwidth + xp, 800 + yp, -10, 0, 0, -1, 1, 1, 1,              // v6
+400 + (-8 + 1) * barwidth + xp, 800 + yp, -10, 0, 0, -1, 1, 1, 1 };            // v5
+GLfloat vertices16[] = { 400 + (-8 + 1) * barwidth + xp, 800 + yp, 0, 0, 0, 1, 1, 1, 1,              // v0 (front)
+400 + (-8 - 1) * barwidth + xp, 800 + yp, 0, 0, 0, 1, 1, 1, 1,              // v1
+400 + (-8 - 1) * barwidth + xp, 0 + yp, 0, 0, 0, 1, 1, 1, 1,              // v2
+400 + (-8 + 1) * barwidth + xp, 0 + yp, 0, 0, 0, 1, 1, 1, 1,              // v3
+
+400 + (-8 + 1) * barwidth + xp, 800 + yp, 0, 1, 0, 0, 1, 1, 1,              // v0 (right)
+400 + (-8 + 1) * barwidth + xp, 0 + yp, 0, 1, 0, 0, 1, 1, 1,              // v3
+400 + (-8 + 1) * barwidth + xp, 0 + yp, -10, 1, 0, 0, 1, 1, 1,              // v4
+400 + (-8 + 1) * barwidth + xp, 800 + yp, -10, 1, 0, 0, 1, 1, 1,              // v5
+
+400 + (-8 + 1) * barwidth + xp, 800 + yp, 0, 0, 1, 0, 1, 1, 1,              // v0 (top)
+400 + (-8 + 1) * barwidth + xp, 800 + yp, -10, 0, 1, 0, 1, 1, 1,              // v5
+400 + (-8 - 1) * barwidth + xp, 800 + yp, -10, 0, 1, 0, 1, 1, 1,              // v6
+400 + (-8 - 1) * barwidth + xp, 800 + yp, 0, 0, 1, 0, 1, 1, 1,              // v1
+
+400 + (-8 - 1) * barwidth + xp, 800 + yp, 0, -1, 0, 0, 1, 1, 1,              // v1 (left)
+400 + (-8 - 1) * barwidth + xp, 800 + yp, -10, -1, 0, 0, 1, 1, 1,              // v6
+400 + (-8 - 1) * barwidth + xp, 0 + yp, -10, -1, 0, 0, 1, 1, 1,              // v7
+400 + (-8 - 1) * barwidth + xp, 0 + yp, 0, -1, 0, 0, 1, 1, 1,              // v2
+
+400 + (-8 - 1) * barwidth + xp, 0 + yp, -10, 0, -1, 0, 1, 1, 1,              // v7 (bottom)
+400 + (-8 + 1) * barwidth + xp, 0 + yp, -10, 0, -1, 0, 1, 1, 1,              // v4
+400 + (-8 + 1) * barwidth + xp, 0 + yp, 0, 0, -1, 0, 1, 1, 1,              // v3
+400 + (-8 - 1) * barwidth + xp, 0 + yp, 0, 0, -1, 0, 1, 1, 1,              // v2
+
+400 + (-8 + 1) * barwidth + xp, 0 + yp, -10, 0, 0, -1, 1, 1, 1,              // v4 (back)
+400 + (-8 - 1) * barwidth + xp, 0 + yp, -10, 0, 0, -1, 1, 1, 1,              // v7
+400 + (-8 - 1) * barwidth + xp, 800 + yp, -10, 0, 0, -1, 1, 1, 1,              // v6
+400 + (-8 + 1) * barwidth + xp, 800 + yp, -10, 0, 0, -1, 1, 1, 1 };            // v5
+GLfloat vertices17[] = { 400 + (-8 + 1) * barwidth + xp, 800 + yp, 0, 0, 0, 1, 1, 1, 1,              // v0 (front)
+400 + (-8 - 1) * barwidth + xp, 800 + yp, 0, 0, 0, 1, 1, 1, 1,              // v1
+400 + (-8 - 1) * barwidth + xp, 0 + yp, 0, 0, 0, 1, 1, 1, 1,              // v2
+400 + (-8 + 1) * barwidth + xp, 0 + yp, 0, 0, 0, 1, 1, 1, 1,              // v3
+
+400 + (-8 + 1) * barwidth + xp, 800 + yp, 0, 1, 0, 0, 1, 1, 1,              // v0 (right)
+400 + (-8 + 1) * barwidth + xp, 0 + yp, 0, 1, 0, 0, 1, 1, 1,              // v3
+400 + (-8 + 1) * barwidth + xp, 0 + yp, -10, 1, 0, 0, 1, 1, 1,              // v4
+400 + (-8 + 1) * barwidth + xp, 800 + yp, -10, 1, 0, 0, 1, 1, 1,              // v5
+
+400 + (-8 + 1) * barwidth + xp, 800 + yp, 0, 0, 1, 0, 1, 1, 1,              // v0 (top)
+400 + (-8 + 1) * barwidth + xp, 800 + yp, -10, 0, 1, 0, 1, 1, 1,              // v5
+400 + (-8 - 1) * barwidth + xp, 800 + yp, -10, 0, 1, 0, 1, 1, 1,              // v6
+400 + (-8 - 1) * barwidth + xp, 800 + yp, 0, 0, 1, 0, 1, 1, 1,              // v1
+
+400 + (-8 - 1) * barwidth + xp, 800 + yp, 0, -1, 0, 0, 1, 1, 1,              // v1 (left)
+400 + (-8 - 1) * barwidth + xp, 800 + yp, -10, -1, 0, 0, 1, 1, 1,              // v6
+400 + (-8 - 1) * barwidth + xp, 0 + yp, -10, -1, 0, 0, 1, 1, 1,              // v7
+400 + (-8 - 1) * barwidth + xp, 0 + yp, 0, -1, 0, 0, 1, 1, 1,              // v2
+
+400 + (-8 - 1) * barwidth + xp, 0 + yp, -10, 0, -1, 0, 1, 1, 1,              // v7 (bottom)
+400 + (-8 + 1) * barwidth + xp, 0 + yp, -10, 0, -1, 0, 1, 1, 1,              // v4
+400 + (-8 + 1) * barwidth + xp, 0 + yp, 0, 0, -1, 0, 1, 1, 1,              // v3
+400 + (-8 - 1) * barwidth + xp, 0 + yp, 0, 0, -1, 0, 1, 1, 1,              // v2
+
+400 + (-8 + 1) * barwidth + xp, 0 + yp, -10, 0, 0, -1, 1, 1, 1,              // v4 (back)
+400 + (-8 - 1) * barwidth + xp, 0 + yp, -10, 0, 0, -1, 1, 1, 1,              // v7
+400 + (-8 - 1) * barwidth + xp, 800 + yp, -10, 0, 0, -1, 1, 1, 1,              // v6
+400 + (-8 + 1) * barwidth + xp, 800 + yp, -10, 0, 0, -1, 1, 1, 1 };            // v5
 
 																			   // index array of vertex array for glDrawElements() & glDrawRangeElement()
 GLubyte indices[] = { 0, 1, 2,   2, 3, 0,      // front
@@ -883,6 +975,72 @@ void draw14()
 	glDisableClientState(GL_NORMAL_ARRAY);
 }
 
+void draw15()
+{
+	// enable and specify pointers to vertex arrays
+	glEnableClientState(GL_NORMAL_ARRAY);
+	glEnableClientState(GL_COLOR_ARRAY);
+	glEnableClientState(GL_VERTEX_ARRAY);
+	glNormalPointer(GL_FLOAT, 9 * sizeof(GLfloat), vertices15 + 3);
+	glColorPointer(3, GL_FLOAT, 9 * sizeof(GLfloat), vertices15 + 6);
+	glVertexPointer(3, GL_FLOAT, 9 * sizeof(GLfloat), vertices15);
+
+	glPushMatrix();
+	//glTranslatef(-2, -2, 0);                // move to bottom-left
+
+	glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_BYTE, indices);
+
+	glPopMatrix();
+
+	glDisableClientState(GL_VERTEX_ARRAY);  // disable vertex arrays
+	glDisableClientState(GL_COLOR_ARRAY);
+	glDisableClientState(GL_NORMAL_ARRAY);
+}
+
+void draw16()
+{
+	// enable and specify pointers to vertex arrays
+	glEnableClientState(GL_NORMAL_ARRAY);
+	glEnableClientState(GL_COLOR_ARRAY);
+	glEnableClientState(GL_VERTEX_ARRAY);
+	glNormalPointer(GL_FLOAT, 9 * sizeof(GLfloat), vertices16 + 3);
+	glColorPointer(3, GL_FLOAT, 9 * sizeof(GLfloat), vertices16 + 6);
+	glVertexPointer(3, GL_FLOAT, 9 * sizeof(GLfloat), vertices16);
+
+	glPushMatrix();
+	//glTranslatef(-2, -2, 0);                // move to bottom-left
+
+	glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_BYTE, indices);
+
+	glPopMatrix();
+
+	glDisableClientState(GL_VERTEX_ARRAY);  // disable vertex arrays
+	glDisableClientState(GL_COLOR_ARRAY);
+	glDisableClientState(GL_NORMAL_ARRAY);
+}
+
+void draw17()
+{
+	// enable and specify pointers to vertex arrays
+	glEnableClientState(GL_NORMAL_ARRAY);
+	glEnableClientState(GL_COLOR_ARRAY);
+	glEnableClientState(GL_VERTEX_ARRAY);
+	glNormalPointer(GL_FLOAT, 9 * sizeof(GLfloat), vertices17 + 3);
+	glColorPointer(3, GL_FLOAT, 9 * sizeof(GLfloat), vertices17 + 6);
+	glVertexPointer(3, GL_FLOAT, 9 * sizeof(GLfloat), vertices17);
+
+	glPushMatrix();
+	//glTranslatef(-2, -2, 0);                // move to bottom-left
+
+	glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_BYTE, indices);
+
+	glPopMatrix();
+
+	glDisableClientState(GL_VERTEX_ARRAY);  // disable vertex arrays
+	glDisableClientState(GL_COLOR_ARRAY);
+	glDisableClientState(GL_NORMAL_ARRAY);
+}
+
 /*
  * OpenGL function for drawing our bar
  */
@@ -901,31 +1059,81 @@ void display() {
 	//if (((xp - (aggrlx + lx) < -325) && (lx > 0)) || ((xp - (aggrlx + lx) > 325) && (lx < 0))) {	// This is supposed to keep the bar on the screen
 	//	lx = 0;
 	//}
-	gluLookAt(x + lx, 0.0f, z,
+
+	
+	if (spinning) {
+		int barTemp = 0.0;
+
+		GLfloat verticesTemp0[216] = { 400, 400 + yp, 0, 0, 0, 1, 1, 1, 1,              // v0 (front)
+			400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0, 0, 0, 1, 1, 1, 1,              // v1
+			400 + 1000 * cosf((barTemp*viewingAngle - viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 360.0), 400 + 1000 * sinf((barTemp*viewingAngle - viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 360.0) + yp, 0, 0, 0, 1, 1, 1, 1,              // v2
+			400 + 1000 * cosf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0/boost))*PI/360.0), 400 + 1000 * sinf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 360.0) + yp, 0, 0, 0, 1, 1, 1, 1,              // v3
+
+			400, 400 + yp, 0, 1, 0, 0, 1, 1, 1,              // v0 (right)
+			400 + 1000 * cosf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 360.0), 400 + 1000 * sinf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 360.0) + yp, 0, 1, 0, 0, 1, 1, 1,              // v3
+			400 + 1000 * cosf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 360.0), 400 + 1000 * sinf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 360.0) + yp, -10, 1, 0, 0, 1, 1, 1,              // v4
+			400, 400 + yp, -10, 1, 0, 0, 1, 1, 1,              // v5
+
+			400, 400 + yp, 0, 0, 1, 0, 1, 1, 1,              // v0 (top)
+			400, 400 + yp, -10, 0, 1, 0, 1, 1, 1,              // v5
+			400, 400 + yp, -10, 0, 1, 0, 1, 1, 1,              // v6
+			400, 400 + yp, 0, 0, 1, 0, 1, 1, 1,              // v1
+
+			400, 400 + yp, 0, -1, 0, 0, 1, 1, 1,              // v1 (left)
+			400, 400 + yp, -10, -1, 0, 0, 1, 1, 1,              // v6
+			400 + 1000 * cosf((barTemp*viewingAngle - viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 360.0), 400 + 1000 * sinf((barTemp*viewingAngle - viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 360.0) + yp, -10, -1, 0, 0, 1, 1, 1,              // v7
+			400 + 1000 * cosf((barTemp*viewingAngle - viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 360.0), 400 + 1000 * sinf((barTemp*viewingAngle - viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 360.0) + yp, 0, -1, 0, 0, 1, 1, 1,              // v2
+
+			400 + 1000 * cosf((barTemp*viewingAngle - viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 360.0), 400 + 1000 * sinf((barTemp*viewingAngle - viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 360.0) + yp, -10, 0, -1, 0, 1, 1, 1,              // v7 (bottom)
+			400 + 1000 * cosf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 360.0), 400 + 1000 * sinf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 360.0) + yp, -10, 0, -1, 0, 1, 1, 1,              // v4
+			400 + 1000 * cosf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 360.0), 400 + 1000 * sinf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 360.0) + yp, 0, 0, -1, 0, 1, 1, 1,              // v3
+			400 + 1000 * cosf((barTemp*viewingAngle - viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 360.0), 400 + 1000 * sinf((barTemp*viewingAngle - viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 360.0) + yp, 0, 0, -1, 0, 1, 1, 1,              // v2
+
+			400 + 1000 * cosf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 360.0), 400 + 1000 * sinf((barTemp*viewingAngle + viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 360.0) + yp, -10, 0, 0, -1, 1, 1, 1,              // v4 (back)
+			400 + 1000 * cosf((barTemp*viewingAngle - viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 360.0), 400 + 1000 * sinf((barTemp*viewingAngle - viewingAngle / 2.0 + (xp*360.0 / boost))*PI / 360.0) + yp, -10, 0, 0, -1, 1, 1, 1,              // v7
+			400, 400 + yp, -10, 0, 0, -1, 1, 1, 1,              // v6
+			400, 400 + yp, -10, 0, 0, -1, 1, 1, 1 };            // v5
+		memcpy(vertices0, verticesTemp0, sizeof(verticesTemp0));
+	}
+	if (horizontal) {
+		gluLookAt(x + lx, 0.0f, z,
+			x + lx, 0.0f, z + lz,
+			1.0f, 0.0f, 0.0f);
+	}
+	else {
+		gluLookAt(x + lx, 0.0f, z,
 			  x + lx, 0.0f, z + lz,
 			  0.0f, 1.0f, 0.0f);
+	}
+	
 	//}
 	aggrlx += lx;
+	if (centered) {
+		lx = 0;
+		centering = 0;
+		centered = 0;
+	}
+	//printf("\n%f", aggrlx);
 	//printf("\n%d", x + lx);
 	//printf("xp is %f\n", xp);
 	//printf("aggrlx is %f\n", aggrlx);
 	//printf("%f\n", (400 + (bars[14] + 1) * barwidth + xp));
 
-	for (int i = 0; i < 15; i++) {
+	for (int i = 0; i < 18; i++) {
 		if (isLeft[i] && (400 + (bars[i] - 1) * barwidth + xp) >= aggrlx) { //When the leftmost edge of the leftmost bar is within the screen, freak out (aka send the rightmost bar to the left)
-			bars[(i + 14) % 15] -= 60;
-			isLeft[(i + 14) % 15] = true;
+			bars[(i + 17) % 18] -= 60;
+			isLeft[(i + 17) % 18] = true;
 			isLeft[i] = false;
-			isRight[(i + 14) % 15] = false;
-			isRight[(i + 13) % 15] = true;
+			isRight[(i + 17) % 18] = false;
+			isRight[(i + 16) % 18] = true;
 			//printf("Moving rightmost bar to the left\n");
 		}
 		else if (isRight[i] && (400 + (bars[i] + 1) * barwidth + xp) <= aggrlx + 800) {
-			bars[(i + 1) % 15] += 60;
-			isRight[(i + 1) % 15] = true;
+			bars[(i + 1) % 18] += 60;
+			isRight[(i + 1) % 18] = true;
 			isRight[i] = false;
-			isLeft[(i + 1) % 15] = false;
-			isLeft[(i + 2) % 15] = true;
+			isLeft[(i + 1) % 18] = false;
+			isLeft[(i + 2) % 18] = true;
 			//printf("Moving leftmost bar to the right\n");
 		}
 	}
@@ -1588,6 +1796,138 @@ void display() {
 		400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,   1, 1, 1,              // v6
 		400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,   1, 1, 1 };            // v5
 	memcpy(vertices14, verticesTemp14, sizeof(verticesTemp14));
+
+	barTemp = bars[15];
+
+	/*
+	glBegin(GL_QUADS);  //Rectangle drawing
+	// Will be using xp and yp as our changing x-position and y-position in our window
+	glVertex3f(400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0);	//475
+	glVertex3f(400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0);	//325
+	glVertex3f(400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0);
+	glVertex3f(400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0);
+
+	glEnd();
+	*/
+
+	GLfloat verticesTemp15[216] = { 400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v0 (front)
+		400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v1
+		400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,              // v2
+		400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,             // v3
+
+		400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   1, 0, 0,   1, 1, 1,              // v0 (right)
+		400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   1, 0, 0,   1, 1, 1,              // v3
+		400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   1, 0, 0,   1, 1, 1,              // v4
+		400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   1, 0, 0,   1, 1, 1,             // v5
+
+		400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v0 (top)
+		400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,  0, 1, 0,    1, 1, 1,              // v5
+		400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 1, 0,   1, 1, 1,              // v6
+		400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v1
+
+		400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v1 (left)
+		400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,  -1, 0, 0,   1, 1, 1,              // v6
+		400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,  -1, 0, 0,   1, 1, 1,              // v7
+		400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v2
+
+		400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,   1, 1, 1,              // v7 (bottom)
+		400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,   1, 1, 1,              // v4
+		400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v3
+		400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v2
+
+		400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v4 (back)
+		400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v7
+		400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,   1, 1, 1,              // v6
+		400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,   1, 1, 1 };            // v5
+	memcpy(vertices15, verticesTemp15, sizeof(verticesTemp15));
+
+	barTemp = bars[16];
+
+	/*
+	glBegin(GL_QUADS);  //Rectangle drawing
+	// Will be using xp and yp as our changing x-position and y-position in our window
+	glVertex3f(400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0);	//475
+	glVertex3f(400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0);	//325
+	glVertex3f(400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0);
+	glVertex3f(400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0);
+
+	glEnd();
+	*/
+
+	GLfloat verticesTemp16[216] = { 400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v0 (front)
+		400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v1
+		400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,              // v2
+		400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,             // v3
+
+		400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   1, 0, 0,   1, 1, 1,              // v0 (right)
+		400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   1, 0, 0,   1, 1, 1,              // v3
+		400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   1, 0, 0,   1, 1, 1,              // v4
+		400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   1, 0, 0,   1, 1, 1,             // v5
+
+		400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v0 (top)
+		400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,  0, 1, 0,    1, 1, 1,              // v5
+		400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 1, 0,   1, 1, 1,              // v6
+		400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v1
+
+		400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v1 (left)
+		400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,  -1, 0, 0,   1, 1, 1,              // v6
+		400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,  -1, 0, 0,   1, 1, 1,              // v7
+		400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v2
+
+		400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,   1, 1, 1,              // v7 (bottom)
+		400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,   1, 1, 1,              // v4
+		400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v3
+		400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v2
+
+		400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v4 (back)
+		400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v7
+		400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,   1, 1, 1,              // v6
+		400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,   1, 1, 1 };            // v5
+	memcpy(vertices16, verticesTemp16, sizeof(verticesTemp16));
+
+	barTemp = bars[17];
+
+	/*
+	glBegin(GL_QUADS);  //Rectangle drawing
+	// Will be using xp and yp as our changing x-position and y-position in our window
+	glVertex3f(400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0);	//475
+	glVertex3f(400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0);	//325
+	glVertex3f(400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0);
+	glVertex3f(400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0);
+
+	glEnd();
+	*/
+
+	GLfloat verticesTemp17[216] = { 400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v0 (front)
+		400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v1
+		400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,              // v2
+		400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,             // v3
+
+		400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   1, 0, 0,   1, 1, 1,              // v0 (right)
+		400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   1, 0, 0,   1, 1, 1,              // v3
+		400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   1, 0, 0,   1, 1, 1,              // v4
+		400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   1, 0, 0,   1, 1, 1,             // v5
+
+		400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v0 (top)
+		400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,  0, 1, 0,    1, 1, 1,              // v5
+		400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 1, 0,   1, 1, 1,              // v6
+		400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v1
+
+		400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v1 (left)
+		400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,  -1, 0, 0,   1, 1, 1,              // v6
+		400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,  -1, 0, 0,   1, 1, 1,              // v7
+		400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v2
+
+		400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,   1, 1, 1,              // v7 (bottom)
+		400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,   1, 1, 1,              // v4
+		400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v3
+		400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v2
+
+		400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v4 (back)
+		400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v7
+		400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,   1, 1, 1,              // v6
+		400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,   1, 1, 1 };            // v5
+	memcpy(vertices17, verticesTemp17, sizeof(verticesTemp17));
 	//printf("%f\n", lx);
 
 	//glEnd();
@@ -1607,7 +1947,20 @@ void display() {
 	draw12();
 	draw13();
 	draw14();
+	draw15();
+	draw16();
+	draw17();
 
+	if (horizontal) {
+		gluLookAt(x, 0.0f, z,
+			x, 0.0f, z + lz,
+			1.0f, 0.0f, 0.0f);
+	}
+	else {
+		gluLookAt(x, 0.0f, z,
+			x, 0.0f, z + lz,
+			0.0f, 1.0f, 0.0f);
+	}
 	glutSwapBuffers(); //done with current frame. Swap to being on the next.
 }
 
@@ -1656,11 +2009,21 @@ float64 calcFeedback() {
 	float64 avgai0 = 0;
 	for (int i = 0; i < read; i++) {
 		int32 j = queueit - read + i;
-		if (j < 0) {
-			avgai0 += currai0[j + 200100];
+		if (horizontal) { //If horizontal, read from Fz
+			if (j < 0) {
+				avgai0 += currai2[j + 200100];
+			}
+			else {
+				avgai0 += currai2[j];
+			}
 		}
 		else {
-			avgai0 += currai0[j];
+			if (j < 0) {
+				avgai0 += currai0[j + 200100];
+			}
+			else {
+				avgai0 += currai0[j];
+			}
 		}
 	}
 	avgai0 = avgai0 / read;
@@ -1707,12 +2070,12 @@ float64 calcFeedback() {
 	 if (strstr(_wglGetExtensionsStringEXT(), extension_name) == NULL)
 	 {
 		 // string was not found
-		 printf("Extension not supported");
+		 printf("\nExtension not supported");
 		 return false;
 	 }
 
 	 // extension is supported
-	 printf("Extension supported");
+	 printf("\nExtension supported");
 	 return true;
  }
 
@@ -1806,10 +2169,11 @@ void speedManager(void) {
 		}
 		
 		if (centering) {
-			lx = 0;
-			centering = 0;
+			lx = -aggrlx;
+			printf("\n%f", lx);
+			centered = 1;
 		}
-		else if (calcFeedback() * calcFeedback() < 5 && abs(calcFeedback()) > threshold) { // Do something to catch the NaN problem
+		else if (calcFeedback() * calcFeedback() < 5 && abs(calcFeedback()) > threshold && closedLoop) { // Do something to catch the NaN problem
 			//lx = calcFeedback();
 			//lx += calcFeedback()/moth's weight in kg * 1574.80315 pixels/m * read * 1.0/10000.0 * 1.0/250.0;
 			lx += (float)(calcFeedback() / (weight)) * width * read * (1.0f / 10000.0f) * (1.0f / 250.0f);
@@ -1888,7 +2252,7 @@ void letter_pressed(unsigned char key, int x, int y) {
 	float frequency;
 	float driftDeg; //drift in degrees/sec
 	switch (key) {
-	case 98:
+	case 98: //b
 		if (clear) {
 			yp = 0;
 			clear = false;
@@ -1899,7 +2263,7 @@ void letter_pressed(unsigned char key, int x, int y) {
 		}
 		glutPostRedisplay();
 		break;
-	case 66:
+	case 66: //B
 		if (clear) {
 			yp = 0;
 			clear = false;
@@ -1909,12 +2273,18 @@ void letter_pressed(unsigned char key, int x, int y) {
 			clear = true;
 		}
 		glutPostRedisplay();
+		break;
+	case 99: //c
+		centering = 1;
+		break;
+	case 67: //C
+		centering = 1;
 		break;
 	case 27: // ESC to exit fullscreen
 		exit(0);
 		break;
 		//Not implemented yet
-	case 114:
+	case 114: //r
 		printf("We are entering our switch case\n");
 		glPushMatrix();
 		glTranslatef(200, 300, 0);
@@ -1933,6 +2303,9 @@ void letter_pressed(unsigned char key, int x, int y) {
 		if (barwidthIt > 0) {
 			barwidthIt--;
 			barwidth = barwidthArr[barwidthIt];
+			if (horizontal) {
+				//barwidth *= 1.763313609;
+			}
 		}
 		glutPostRedisplay();
 		break;
@@ -1940,6 +2313,9 @@ void letter_pressed(unsigned char key, int x, int y) {
 		if (barwidthIt < 2) {
 			barwidthIt++;
 			barwidth = barwidthArr[barwidthIt];
+			if (horizontal) {
+				//barwidth *= 1.763313609;
+			}
 		}
 		glutPostRedisplay();
 		break;
@@ -1959,6 +2335,9 @@ void letter_pressed(unsigned char key, int x, int y) {
 		bars[12] = 0;
 		bars[13] = 0;
 		bars[14] = 0;
+		bars[15] = 0;
+		bars[16] = 0;
+		bars[17] = 0;
 		glutPostRedisplay();
 		break;
 	case 50: //2 will make stimulus 5-bar grate
@@ -1982,6 +2361,7 @@ void letter_pressed(unsigned char key, int x, int y) {
 	case 86: //V will request viewing angle
 		printf("\nInput viewing angle in degrees: ");
 		scanf("%f", &degree);
+		viewingAngle = degree;
 		barwidth = (float) 0.307975 * tanf(degree * PI / (2.0 * 180.0)) * 1342.281879;
 		printf("%f", barwidth);
 		glutPostRedisplay();
@@ -1989,6 +2369,7 @@ void letter_pressed(unsigned char key, int x, int y) {
 	case 118: //v will request viewing angle
 		printf("\nInput viewing angle in degrees: ");
 		scanf("%f", &degree);
+		viewingAngle = degree;
 		barwidth = (float) 0.307975 * tanf(degree * PI / (2.0 * 180.0)) * 1342.281879;
 		printf("%f", barwidth);
 		glutPostRedisplay();
@@ -2019,6 +2400,52 @@ void letter_pressed(unsigned char key, int x, int y) {
 		scanf("%f", &driftDeg);
 		driftVel = 2.0*PI*0.307975*(driftDeg / 360.0)*1342.281879*(1.0 / 120.0);
 		drifting = 1;
+		glutPostRedisplay();
+		break;
+	case 79: //O will make open-loop
+		printf("\nNow in open-loop.");
+		closedLoop = 0;
+		centering = 1;
+		glutPostRedisplay();
+		break;
+	case 111: //o will make open-loop
+		printf("\nNow in open-loop.");
+		closedLoop = 0;
+		centering = 1;
+		glutPostRedisplay();
+		break;
+	case 80: //P will make closed-loop
+		printf("\nNow in closed-loop.");
+		closedLoop = 1;
+		glutPostRedisplay();
+		break;
+	case 112: //p will make closed-loop
+		printf("\nNow in closed-loop.");
+		closedLoop = 1;
+		glutPostRedisplay();
+		break;
+	case 72: //H will make horizontal bars
+		printf("\nBars are now horizontal.");
+		horizontal = 1;
+		//barwidth = barwidthArr[barwidthIt] * 1.763313609;
+		glutPostRedisplay();
+		break;
+	case 104: //h will make horizontal bars
+		printf("\nBars are now horizontal.");
+		horizontal = 1;
+		//barwidth = barwidthArr[barwidthIt] * 1.763313609;
+		glutPostRedisplay();
+		break;
+	case 76: //L will make vertical bars
+		printf("\nBars are now vertical.");
+		horizontal = 0;
+		//barwidth = barwidthArr[barwidthIt];
+		glutPostRedisplay();
+		break;
+	case 108: //l will make vertical bars
+		printf("\nBars are now vertical.");
+		horizontal = 0;
+		//barwidth = barwidthArr[barwidthIt];
 		glutPostRedisplay();
 		break;
 	}
@@ -2057,7 +2484,7 @@ int main(int argc, char** argv) {
 	//printf("%f\n", data[199999]);
 	//printf("Acquired %d samples\n", (int)read);
 	printf("\ngot passed through analog");
-	printf("%f\n", data[1199999]);
+	printf("\n%f\n", data[1199999]);
 	for (int i = 0; i < read; i++) {
 		if (queueit >= 200100) {
 			queueit = 0;
@@ -2085,7 +2512,7 @@ int main(int argc, char** argv) {
 
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGB);
-	glutInitWindowSize(800, 800);
+	glutInitWindowSize(800, 454);
 	glutInitWindowPosition(100, 100);
 	glutCreateWindow("Virtual Reality - Closed Loop");
 
@@ -2112,7 +2539,7 @@ int main(int argc, char** argv) {
 	//printf("finished speedManager\n");
 
 	glClearColor(0, 0, 0, 0);
-	gluOrtho2D(0.0, 800, 0.0, 800);
+	gluOrtho2D(0.0, 800, 173, 627);
 
 	glutSpecialFunc(key_pressed);
 	glutKeyboardFunc(letter_pressed);
