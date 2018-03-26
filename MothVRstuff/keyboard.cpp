@@ -102,6 +102,9 @@ bool closedLoop = 0;
 bool horizontal = 0; //True if stimuli are horizontal bars.
 bool spinning = 0; //True if stimuli are spinning spokes.
 float viewingAngle = 10; //This viewing angle will be used for the spokes.
+//float angle = 0;
+float angularVel = 0;
+float angularAcc = 0;
 
 GLfloat vertices0[] = { 400 + (-8 + 1) * barwidth + xp, 800 + yp, 0, 0, 0, 1, 1, 1, 1,              // v0 (front)
 400 + (-8 - 1) * barwidth + xp, 800 + yp, 0, 0, 0, 1, 1, 1, 1,              // v1
@@ -1062,9 +1065,11 @@ void display() {
 
 	
 	if (spinning) {
+		float upx = sinf(angle);
+		float upy = cosf(angle);
 		gluLookAt(x, 0.0f, z,
 			x, 0.0f, z + lz,
-			0.0f, 1.0f, 0.0f);
+			upx, upy, 0.0f);
 		float barTemp = 0.0;
 		
 		GLfloat verticesTemp0[216] = { 400, 400 + yp, 0, 0, 0, 1, 1, 1, 1,              // v0 (front)
@@ -2574,7 +2579,15 @@ float64 calcFeedback() {
 	float64 avgai0 = 0;
 	for (int i = 0; i < read; i++) {
 		int32 j = queueit - read + i;
-		if (horizontal) { //If horizontal, read from Fz
+		if (spinning) {
+			if (j < 0) {
+				avgai0 += currai4[j + 200100];
+			}
+			else {
+				avgai0 += currai4[j];
+			}
+		}
+		else if (horizontal) { //If horizontal, read from Fz
 			if (j < 0) {
 				avgai0 += currai2[j + 200100];
 			}
@@ -2736,20 +2749,32 @@ void speedManager(void) {
 			queueit++;
 		}
 		
-		if (centering) {
-			lx = -aggrlx;
-			printf("\n%f", lx);
-			centered = 1;
+		if (spinning) {
+			if (centering) {
+
+			}
+			else if (calcFeedback() * calcFeedback() < 5 && abs(calcFeedback()) > threshold && closedLoop) {
+				angularAcc = calcFeedback() / (0.4 * weight * 0.01) * (1.0f / 120.0f) * (1.0f / 120.0f);
+				angle += (angularAcc / 2.0) * (read * (1.0f / 10000.0f) * (120.0f / 1.0f)) * (read * (1.0f / 10000.0f) * (120.0f / 1.0f)) + angularVel * (read * (1.0f / 10000.0f) * (120.0f / 1.0f));
+				angularVel += angularAcc * (read * (1.0f / 10000.0f) * (120.0f / 1.0f));
+			}
 		}
-		else if (calcFeedback() * calcFeedback() < 5 && abs(calcFeedback()) > threshold && closedLoop) { // Do something to catch the NaN problem
-			//lx = calcFeedback();
-			//lx += calcFeedback()/moth's weight in kg * 1574.80315 pixels/m * read * 1.0/10000.0 * 1.0/120.0;
-			lx += (float)(calcFeedback() / (weight)) * width * read * (1.0f / 10000.0f) * (1.0f / 120.0f);
+		else {
+			if (centering) {
+				lx = -aggrlx;
+				printf("\n%f", lx);
+				centered = 1;
+			}
+			else if (calcFeedback() * calcFeedback() < 5 && abs(calcFeedback()) > threshold && closedLoop) { // Do something to catch the NaN problem
+				//lx = calcFeedback();
+				//lx += calcFeedback()/moth's weight in kg * 1574.80315 pixels/m * read * 1.0/10000.0 * 1.0/120.0;
+				lx = (float)(calcFeedback() / (weight)) * width * read * (1.0f / 10000.0f) * (1.0f / 120.0f);
+			}
+			//aggrlx += lx;
+			//aggrlx += lx * (double(delta_t) / double(fps_frames)) / 1000;
+			//printf("%f\n", lx);
+			//printf("Acquired %d samples\n", (int)read);
 		}
-		//aggrlx += lx;
-		//aggrlx += lx * (double(delta_t) / double(fps_frames)) / 1000;
-		//printf("%f\n", lx);
-		//printf("Acquired %d samples\n", (int)read);
 
 		glutPostRedisplay(); //redraws window
 		//glutTimerFunc(4, speedManager, 0);
