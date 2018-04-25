@@ -24,7 +24,8 @@
 #include <time.h>
 #include <windows.h>
 #include "wglext.h"
-//#include <string.h>
+#include <sys/stat.h>
+#include <string.h>
 //#include <GL/glui.h>
 
 
@@ -101,12 +102,15 @@ float driftVel = 0;
 bool closedLoop = 0;
 bool horizontal = 0; //True if stimuli are horizontal bars.
 bool spinning = 0; //True if stimuli are spinning spokes.
-float viewingAngle = 10; //This viewing angle will be used for the spokes.
+float viewingAngle = 30; //This viewing angle will be used for the spokes.
 //float angle = 0;
 float angularVel = 0;
 float angularAcc = 0;
 bool single = 0; //True if single-bar
-bool test = 1; //True if testing "=" instead of "+="
+bool test = 0; //True if testing "=" instead of "+="
+float coeff = 0.002196366; //The coefficient for drag stuff.
+float posneg = -1.0; //Whether to add or subtract drag
+bool turbulent = 1;
 
 GLfloat vertices0[] = { 400 + (-8 + 1) * barwidth + xp, 800 + yp, 0, 0, 0, 1, 1, 1, 1,              // v0 (front)
 400 + (-8 - 1) * barwidth + xp, 800 + yp, 0, 0, 0, 1, 1, 1, 1,              // v1
@@ -1692,7 +1696,7 @@ void display() {
 			//printf("%f\n", (400 + (bars[14] + 1) * barwidth + xp));
 
 			for (int i = 0; i < 18; i++) {
-				if (isLeft[i] && (400 + (bars[i] - 1) * barwidth + xp) >= aggrlx) { //When the leftmost edge of the leftmost bar is within the screen, freak out (aka send the rightmost bar to the left)
+				if (isLeft[i] && (400 + (bars[i] - 1) * barwidth + xp) >= aggrlx && !single) { //When the leftmost edge of the leftmost bar is within the screen, freak out (aka send the rightmost bar to the left)
 					bars[(i + 17) % 18] -= 60;
 					isLeft[(i + 17) % 18] = true;
 					isLeft[i] = false;
@@ -1700,13 +1704,19 @@ void display() {
 					isRight[(i + 16) % 18] = true;
 					//printf("Moving rightmost bar to the left\n");
 				}
-				else if (isRight[i] && (400 + (bars[i] + 1) * barwidth + xp) <= aggrlx + 800) {
+				else if (isRight[i] && (400 + (bars[i] + 1) * barwidth + xp) <= aggrlx + 800 && !single) {
 					bars[(i + 1) % 18] += 60;
 					isRight[(i + 1) % 18] = true;
 					isRight[i] = false;
 					isLeft[(i + 1) % 18] = false;
 					isLeft[(i + 2) % 18] = true;
 					//printf("Moving leftmost bar to the right\n");
+				}
+				else if (single && (400 + (bars[i] - 1) * barwidth + xp) >= aggrlx + 1600) { //When single bar and the leftmost edge of the bar goes over 1000, send it to just below zero
+					bars[i] -= (int)(2000/barwidth); //Why 16? who knows
+				}
+				else if (single && (400 + (bars[i] + 1) * barwidth + xp) <= aggrlx - 800) { //When single bar and the rightmost edge of the bar goes under -200, send it to just over 800
+					bars[i] += (int)(2000/barwidth);
 				}
 			}
 
@@ -2538,6 +2548,14 @@ void display() {
 }
 
 /*
+ * Tests to see if the file exists.
+ **/
+inline bool exists_test3(const std::string& name) {
+	struct stat buffer;
+	return (stat(name.c_str(), &buffer) == 0);
+}
+
+/*
  * Allows for the user to printout data obtain from NIDAQ channels.
  * Currently will start outputting to file after trigger has been pressed.
  **/
@@ -2554,6 +2572,14 @@ void writeToFile() {
 
 	char filename[80];
 	sprintf(filename, "./Data/Moth_FT_%s_%03d.txt", buffer, increment);
+	bool exists = exists_test3(filename);
+
+	while (exists) {
+		increment++;
+		sprintf(filename, "./Data/Moth_FT_%s_%03d.txt", buffer, increment);
+		//printf("\n%s", filename);
+		exists = exists_test3(filename);
+	}
 
 	fileP = fopen(filename, "w");
 	printf("\n%s", filename);
@@ -2710,7 +2736,7 @@ void speedManager(void) {
 		writeToFile();
 		written = 1;
 	}
-	if (currai6[queueit - 1] == 1) {
+	if (currai6[queueit - 1] != 0) {
 		written = 0;
 	}
 	it1++;
@@ -2767,29 +2793,72 @@ void speedManager(void) {
 			queueit++;
 		}
 		
+		float F = calcFeedback();
 		if (spinning) {
 			if (centering) {
 
 			}
-			else if (calcFeedback() * calcFeedback() < 5 && abs(calcFeedback()) > threshold && closedLoop) {
-				angularAcc = calcFeedback() / (0.4 * weight * 0.01) * (1.0f / 120.0f) * (1.0f / 120.0f);
+			else if ((F*F) < 5 && abs(F) > threshold && closedLoop) {
+				angularAcc = F / (0.4 * weight * 0.0025) * (1.0f / 120.0f) * (1.0f / 120.0f);
 				angle += (angularAcc / 2.0) * (read * (1.0f / 10000.0f) * (120.0f / 1.0f)) * (read * (1.0f / 10000.0f) * (120.0f / 1.0f)) + angularVel * (read * (1.0f / 10000.0f) * (120.0f / 1.0f));
 				angularVel += angularAcc * (read * (1.0f / 10000.0f) * (120.0f / 1.0f));
 			}
 		}
 		else {
+			float increment = 0.0;
+
+			//if (F == 0) {
+			/*
+			if (lx == 0) {
+				increment = (float)(F / weight) * width * read * (1.0f / 10000.0f) * (1.0f / 120.0f);
+			}
+			else {
+				//increment = (float)(F / abs(F)) * (abs(F) - (coeff * (lx * (1.0f / width) * (120.0f / 1.0f)) * (lx * (1.0f / width) * (120.0f / 1.0f))) / (weight)) * width * read * (1.0f / 10000.0f) * (1.0f / 120.0f);
+				increment = (float)(F -(lx / abs(lx)) * (coeff * (lx * (1.0f / width) * (120.0f / 1.0f)) * (lx * (1.0f / width) * (120.0f / 1.0f))) / (weight)) * width * read * (1.0f / 10000.0f) * (1.0f / 120.0f);
+			}
+			*/
 			if (centering) {
 				lx = -aggrlx;
 				printf("\n%f", lx);
 				centered = 1;
 			}
-			else if (calcFeedback() * calcFeedback() < 5 && abs(calcFeedback()) > threshold && closedLoop && test) { // Do something to catch the NaN problem
+			else if ((F*F) < 5 && abs(F) > threshold && closedLoop && test) { // Do something to catch the NaN problem
 				//lx = calcFeedback();
 				//lx += calcFeedback()/moth's weight in kg * 1574.80315 pixels/m * read * 1.0/10000.0 * 1.0/120.0;
-				lx = (float)(calcFeedback() / (weight)) * width * read * (1.0f / 10000.0f) * (1.0f / 120.0f);
+				lx = (float)(F / (weight)) * width * read * (1.0f / 10000.0f) * (1.0f / 120.0f);
 			}
-			else if (calcFeedback() * calcFeedback() < 5 && abs(calcFeedback()) > threshold && closedLoop) {
-				lx += (float)(calcFeedback() / (weight)) * width * read * (1.0f / 10000.0f) * (1.0f / 120.0f);
+			//else if ((F*F) < 5 && abs(F) > threshold && closedLoop) {
+			else if ((F*F) < 5 && closedLoop) {
+				//printf("Actually doing closed-loop stuff");
+				//if (abs(F) - (coeff * (lx * (1.0f / width) * (120.0f / 1.0f)) * (lx * (1.0f / width) * (120.0f / 1.0f))) >= 0) { // Make sure the drag isn't pushing the moth the other way
+				//printf("\n%f", F);
+				if (abs(F) < threshold) {
+					F = 0;
+				}
+				if (lx == 0) {
+					increment = (float)(F / weight) * width * read * (1.0f / 10000.0f) * (1.0f / 120.0f);
+				}
+				else {
+					if (turbulent) {
+						//increment = (float)(F / abs(F)) * (abs(F) - (coeff * (lx * (1.0f / width) * (120.0f / 1.0f)) * (lx * (1.0f / width) * (120.0f / 1.0f))) / (weight)) * width * read * (1.0f / 10000.0f) * (1.0f / 120.0f);
+						increment = (float)((F - (lx / abs(lx)) * (coeff * (lx * (1.0f / width) * (120.0f / 1.0f)) * (lx * (1.0f / width) * (120.0f / 1.0f)))) / (weight)) * width * read * (1.0f / 10000.0f) * (1.0f / 120.0f);
+					}
+					else {
+						increment = (float)((F - (coeff * (lx * (1.0f / width) * (120.0f / 1.0f)))) / (weight)) * width * read * (1.0f / 10000.0f) * (1.0f / 120.0f);
+					}
+				}
+				if (!(F > 0 && lx <= 0 && increment <= 0) && !(F < 0 && lx >= 0 && increment >= 0)) {
+				//if (1) {
+					//printf("Actually doing drag stuff");
+					//printf("\n%f", F);
+					//printf("\n%f", increment);
+					//printf("\n%f", lx / abs(lx));
+					lx += increment;
+				}
+				else {
+					//printf("\nNot working but %f", increment);
+					lx = 0;
+				}
 			}
 			//aggrlx += lx;
 			//aggrlx += lx * (double(delta_t) / double(fps_frames)) / 1000;
@@ -2865,6 +2934,7 @@ void letter_pressed(unsigned char key, int x, int y) {
 	float degree;
 	float frequency;
 	float driftDeg; //drift in degrees/sec
+	float c;
 	switch (key) {
 	case 98: //b
 		///*
@@ -2923,6 +2993,7 @@ void letter_pressed(unsigned char key, int x, int y) {
 		if (barwidthIt > 0) {
 			barwidthIt--;
 			barwidth = barwidthArr[barwidthIt];
+			viewingAngle = barwidth * 10 + 20;
 			if (horizontal) {
 				//barwidth *= 1.763313609;
 			}
@@ -2933,6 +3004,7 @@ void letter_pressed(unsigned char key, int x, int y) {
 		if (barwidthIt < 2) {
 			barwidthIt++;
 			barwidth = barwidthArr[barwidthIt];
+			viewingAngle = barwidth * 10 + 20;
 			if (horizontal) {
 				//barwidth *= 1.763313609;
 			}
@@ -2981,6 +3053,43 @@ void letter_pressed(unsigned char key, int x, int y) {
 		bars[15] = 28;
 		bars[16] = 32;
 		bars[17] = 36;
+
+		isRight[0] = false;
+		isRight[1] = false;
+		isRight[2] = false;
+		isRight[3] = false;
+		isRight[4] = false;
+		isRight[5] = false;
+		isRight[6] = false;
+		isRight[7] = false;
+		isRight[8] = false;
+		isRight[9] = false;
+		isRight[10] = false;
+		isRight[11] = false;
+		isRight[12] = false;
+		isRight[13] = false;
+		isRight[14] = false;
+		isRight[15] = false;
+		isRight[16] = false;
+		isRight[17] = true;
+		isLeft[0] = true;
+		isLeft[1] = false;
+		isLeft[2] = false;
+		isLeft[3] = false;
+		isLeft[4] = false;
+		isLeft[5] = false;
+		isLeft[6] = false;
+		isLeft[7] = false;
+		isLeft[8] = false;
+		isLeft[9] = false;
+		isLeft[10] = false;
+		isLeft[11] = false;
+		isLeft[12] = false;
+		isLeft[13] = false;
+		isLeft[14] = false;
+		isLeft[15] = false;
+		isLeft[16] = false;
+		isLeft[17] = false;
 		glutPostRedisplay();
 		break;
 	case 86: //V will request viewing angle
@@ -3125,6 +3234,44 @@ void letter_pressed(unsigned char key, int x, int y) {
 		}
 		glutPostRedisplay();
 		break;
+	case 69: //E will request coefficient
+		printf("\nInput drag coefficient thing: ");
+		scanf("%f", &c);
+		coeff = c;
+		glutPostRedisplay();
+		break;
+	case 101: //e will request coefficient
+		printf("\nInput drag coefficient thing: ");
+		scanf("%f", &c);
+		coeff = c;
+		glutPostRedisplay();
+		break;
+	case 87: //W will change flow state (turbulent vs. laminar)
+		if (turbulent) {
+			turbulent = 0;
+			printf("\nLaminar flow");
+			coeff = 0.0004673119072;
+		}
+		else {
+			turbulent = 1;
+			printf("\nTurbulent flow");
+			coeff = 0.002196366;
+		}
+		glutPostRedisplay();
+		break;
+	case 119: //w will change flow state (turbulent vs. laminar)
+		if (turbulent) {
+			turbulent = 0;
+			printf("\nLaminar flow");
+			coeff = 0.1;
+		}
+		else {
+			turbulent = 1;
+			printf("\nTurbulent flow");
+			coeff = 0.0004673119072;
+		}
+		glutPostRedisplay();
+		break;
 	}
 }
 
@@ -3144,7 +3291,7 @@ int main(int argc, char** argv) {
 
 	// IMPORTANT
 	//changed Dev1 to Dev5 as the connection established. So verify what Dev is being used to update this code. DEV5 is our force torque.
-	DAQmxErrChk(DAQmxCreateAIVoltageChan(taskHandle, "Dev1/ai0:6", "", DAQmx_Val_Cfg_Default, -10.0, 10.0, DAQmx_Val_Volts, NULL));
+	DAQmxErrChk(DAQmxCreateAIVoltageChan(taskHandle, "Dev1/ai0:6", "", DAQmx_Val_Diff, -10.0, 10.0, DAQmx_Val_Volts, NULL));
 	DAQmxErrChk(DAQmxCfgSampClkTiming(taskHandle, "", 10000.0, DAQmx_Val_Rising, DAQmx_Val_ContSamps, 200100));
 	// DAQmx Start Code
 	DAQmxErrChk(DAQmxStartTask(taskHandle));
