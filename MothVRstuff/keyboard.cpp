@@ -55,7 +55,7 @@ float xAccelArr[5] = { -0.5f, -0.1f, 0.0f, 0.1f, 0.5f};
 float xAccel = xAccelArr[xAccelIt];
 int barwidthIt = 1;
 //float barwidthArr[3] = { 145.8f / 2, 221.5f / 2, 300.9f / 2 };
-float barwidthArr[3] = { 72, 110, 150 }; //Half of the barwidth, not the whole thing.
+float barwidthArr[3] = { (9.0 / 16.0) * 72, (9.0 / 16.0) * 110, (9.0 / 16.0) * 150 }; //Half of the barwidth, not the whole thing.
 float barwidth = barwidthArr[barwidthIt];
 //int bars[5] = { -8, -4, 0, 4, 8 };	//These should (increment or decrement) by 20 when the bars go too far off the screen.
 //bool isRight[5] = { false, false, false, false, true }; //This keeps track of the rightmost bar
@@ -111,6 +111,7 @@ bool test = 0; //True if testing "=" instead of "+="
 float coeff = 0.002196366; //The coefficient for drag stuff.
 float posneg = -1.0; //Whether to add or subtract drag
 bool turbulent = 1;
+int center = 400; //This is the center of the screen; changes between 400 and 227 depending on whether or not we're horizontal.
 
 GLfloat vertices0[] = { 400 + (-8 + 1) * barwidth + xp, 800 + yp, 0, 0, 0, 1, 1, 1, 1,              // v0 (front)
 400 + (-8 - 1) * barwidth + xp, 800 + yp, 0, 0, 0, 1, 1, 1, 1,              // v1
@@ -1068,7 +1069,12 @@ void display() {
 	//if (((xp - (aggrlx + lx) < -325) && (lx > 0)) || ((xp - (aggrlx + lx) > 325) && (lx < 0))) {	// This is supposed to keep the bar on the screen
 	//	lx = 0;
 	//}
-
+	if (horizontal) {
+		center = 400;
+	}
+	else {
+		center = -400;
+	}
 	if (!clear) {
 		if (spinning) {
 			float upx = sinf(angle);
@@ -1674,12 +1680,14 @@ void display() {
 			if (horizontal) {
 				gluLookAt(x + lx, 0.0f, z,
 					x + lx, 0.0f, z + lz,
-					1.0f, 0.0f, 0.0f);
+					//1.0f, 0.0f, 0.0f);
+					0.0f, 1.0f, 0.0f);
 			}
 			else {
 				gluLookAt(x + lx, 0.0f, z,
 					x + lx, 0.0f, z + lz,
-					0.0f, 1.0f, 0.0f);
+					//0.0f, 1.0f, 0.0f);
+					1.0f, 0.0f, 0.0f);
 			}
 
 			//}
@@ -1696,7 +1704,7 @@ void display() {
 			//printf("%f\n", (400 + (bars[14] + 1) * barwidth + xp));
 
 			for (int i = 0; i < 18; i++) {
-				if (isLeft[i] && (400 + (bars[i] - 1) * barwidth + xp) >= aggrlx && !single) { //When the leftmost edge of the leftmost bar is within the screen, freak out (aka send the rightmost bar to the left)
+				if (isLeft[i] && (center + (bars[i] - 1) * barwidth + xp) >= aggrlx + (2 - (2 * horizontal)) * center && !single) { //When the leftmost edge of the leftmost bar is within the screen, freak out (aka send the rightmost bar to the left)
 					bars[(i + 17) % 18] -= 60;
 					isLeft[(i + 17) % 18] = true;
 					isLeft[i] = false;
@@ -1704,7 +1712,7 @@ void display() {
 					isRight[(i + 16) % 18] = true;
 					//printf("Moving rightmost bar to the left\n");
 				}
-				else if (isRight[i] && (400 + (bars[i] + 1) * barwidth + xp) <= aggrlx + 800 && !single) {
+				else if (isRight[i] && (center + (bars[i] + 1) * barwidth + xp) <= aggrlx + center * (2 * horizontal) && !single) {
 					bars[(i + 1) % 18] += 60;
 					isRight[(i + 1) % 18] = true;
 					isRight[i] = false;
@@ -1712,10 +1720,10 @@ void display() {
 					isLeft[(i + 2) % 18] = true;
 					//printf("Moving leftmost bar to the right\n");
 				}
-				else if (single && (400 + (bars[i] - 1) * barwidth + xp) >= aggrlx + 1600) { //When single bar and the leftmost edge of the bar goes over 1000, send it to just below zero
+				else if (single && (center + (bars[i] - 1) * barwidth + xp) >= aggrlx + center * (-2 + (horizontal * 6))) { //center * 4) { //When single bar and the leftmost edge of the bar goes over 1000, send it to just below zero
 					bars[i] -= (int)(2000/barwidth); //Why 16? who knows
 				}
-				else if (single && (400 + (bars[i] + 1) * barwidth + xp) <= aggrlx - 800) { //When single bar and the rightmost edge of the bar goes under -200, send it to just over 800
+				else if (single && (center + (bars[i] + 1) * barwidth + xp) <= aggrlx + center * (4 + (horizontal * -6))) {//- center * 2) { //When single bar and the rightmost edge of the bar goes under -200, send it to just over 800
 					bars[i] += (int)(2000/barwidth);
 				}
 			}
@@ -1732,35 +1740,35 @@ void display() {
 			glEnd();
 			*/
 
-			GLfloat verticesTemp0[216] = { 400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0, 0, 0, 1, 1, 1, 1,              // v0 (front)
-				400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0, 0, 0, 1, 1, 1, 1,              // v1
-				400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0, 0, 0, 1, 1, 1, 1,              // v2
-				400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0, 0, 0, 1, 1, 1, 1,              // v3
+			GLfloat verticesTemp0[216] = { center + (barTemp + 1) * barwidth + xp, 800 + yp, 0, 0, 0, 1, 1, 1, 1,              // v0 (front)
+				center + (barTemp - 1) * barwidth + xp, 800 + yp, 0, 0, 0, 1, 1, 1, 1,              // v1
+				center + (barTemp - 1) * barwidth + xp, 0 + yp, 0, 0, 0, 1, 1, 1, 1,              // v2
+				center + (barTemp + 1) * barwidth + xp, 0 + yp, 0, 0, 0, 1, 1, 1, 1,              // v3
 
-				400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0, 1, 0, 0, 1, 1, 1,              // v0 (right)
-				400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0, 1, 0, 0, 1, 1, 1,              // v3
-				400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10, 1, 0, 0, 1, 1, 1,              // v4
-				400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10, 1, 0, 0, 1, 1, 1,              // v5
+				center + (barTemp + 1) * barwidth + xp, 800 + yp, 0, 1, 0, 0, 1, 1, 1,              // v0 (right)
+				center + (barTemp + 1) * barwidth + xp, 0 + yp, 0, 1, 0, 0, 1, 1, 1,              // v3
+				center + (barTemp + 1) * barwidth + xp, 0 + yp, -10, 1, 0, 0, 1, 1, 1,              // v4
+				center + (barTemp + 1) * barwidth + xp, 800 + yp, -10, 1, 0, 0, 1, 1, 1,              // v5
 
-				400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0, 0, 1, 0, 1, 1, 1,              // v0 (top)
-				400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10, 0, 1, 0, 1, 1, 1,              // v5
-				400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10, 0, 1, 0, 1, 1, 1,              // v6
-				400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0, 0, 1, 0, 1, 1, 1,              // v1
+				center + (barTemp + 1) * barwidth + xp, 800 + yp, 0, 0, 1, 0, 1, 1, 1,              // v0 (top)
+				center + (barTemp + 1) * barwidth + xp, 800 + yp, -10, 0, 1, 0, 1, 1, 1,              // v5
+				center + (barTemp - 1) * barwidth + xp, 800 + yp, -10, 0, 1, 0, 1, 1, 1,              // v6
+				center + (barTemp - 1) * barwidth + xp, 800 + yp, 0, 0, 1, 0, 1, 1, 1,              // v1
 
-				400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0, -1, 0, 0, 1, 1, 1,              // v1 (left)
-				400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10, -1, 0, 0, 1, 1, 1,              // v6
-				400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10, -1, 0, 0, 1, 1, 1,              // v7
-				400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0, -1, 0, 0, 1, 1, 1,              // v2
+				center + (barTemp - 1) * barwidth + xp, 800 + yp, 0, -1, 0, 0, 1, 1, 1,              // v1 (left)
+				center + (barTemp - 1) * barwidth + xp, 800 + yp, -10, -1, 0, 0, 1, 1, 1,              // v6
+				center + (barTemp - 1) * barwidth + xp, 0 + yp, -10, -1, 0, 0, 1, 1, 1,              // v7
+				center + (barTemp - 1) * barwidth + xp, 0 + yp, 0, -1, 0, 0, 1, 1, 1,              // v2
 
-				400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10, 0, -1, 0, 1, 1, 1,              // v7 (bottom)
-				400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10, 0, -1, 0, 1, 1, 1,              // v4
-				400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0, 0, -1, 0, 1, 1, 1,              // v3
-				400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0, 0, -1, 0, 1, 1, 1,              // v2
+				center + (barTemp - 1) * barwidth + xp, 0 + yp, -10, 0, -1, 0, 1, 1, 1,              // v7 (bottom)
+				center + (barTemp + 1) * barwidth + xp, 0 + yp, -10, 0, -1, 0, 1, 1, 1,              // v4
+				center + (barTemp + 1) * barwidth + xp, 0 + yp, 0, 0, -1, 0, 1, 1, 1,              // v3
+				center + (barTemp - 1) * barwidth + xp, 0 + yp, 0, 0, -1, 0, 1, 1, 1,              // v2
 
-				400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10, 0, 0, -1, 1, 1, 1,              // v4 (back)
-				400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10, 0, 0, -1, 1, 1, 1,              // v7
-				400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10, 0, 0, -1, 1, 1, 1,              // v6
-				400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10, 0, 0, -1, 1, 1, 1 };            // v5
+				center + (barTemp + 1) * barwidth + xp, 0 + yp, -10, 0, 0, -1, 1, 1, 1,              // v4 (back)
+				center + (barTemp - 1) * barwidth + xp, 0 + yp, -10, 0, 0, -1, 1, 1, 1,              // v7
+				center + (barTemp - 1) * barwidth + xp, 800 + yp, -10, 0, 0, -1, 1, 1, 1,              // v6
+				center + (barTemp + 1) * barwidth + xp, 800 + yp, -10, 0, 0, -1, 1, 1, 1 };            // v5
 			memcpy(vertices0, verticesTemp0, sizeof(verticesTemp0));
 
 			barTemp = bars[1];
@@ -1776,35 +1784,35 @@ void display() {
 			glEnd();
 			*/
 
-			GLfloat verticesTemp1[216] = { 400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v0 (front)
-				400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v1
-				400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,              // v2
-				400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,              // v3
+			GLfloat verticesTemp1[216] = { center + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v0 (front)
+				center + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v1
+				center + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,              // v2
+				center + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,              // v3
 
-				400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   1, 0, 0,   1, 1, 1,              // v0 (right)
-				400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   1, 0, 0,   1, 1, 1,              // v3
-				400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   1, 0, 0,   1, 1, 1,              // v4
-				400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   1, 0, 0,  1, 1, 1,              // v5
+				center + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   1, 0, 0,   1, 1, 1,              // v0 (right)
+				center + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   1, 0, 0,   1, 1, 1,              // v3
+				center + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   1, 0, 0,   1, 1, 1,              // v4
+				center + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   1, 0, 0,  1, 1, 1,              // v5
 
-				400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v0 (top)
-				400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,  0, 1, 0,   1, 1, 1,              // v5
-				400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 1, 0,   1, 1, 1,              // v6
-				400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v1
+				center + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v0 (top)
+				center + (barTemp + 1) * barwidth + xp, 800 + yp, -10,  0, 1, 0,   1, 1, 1,              // v5
+				center + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 1, 0,   1, 1, 1,              // v6
+				center + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v1
 
-				400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v1 (left)
-				400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,  -1, 0, 0,  1, 1, 1,              // v6
-				400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,  -1, 0, 0,   1, 1, 1,              // v7
-				400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v2
+				center + (barTemp - 1) * barwidth + xp, 800 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v1 (left)
+				center + (barTemp - 1) * barwidth + xp, 800 + yp, -10,  -1, 0, 0,  1, 1, 1,              // v6
+				center + (barTemp - 1) * barwidth + xp, 0 + yp, -10,  -1, 0, 0,   1, 1, 1,              // v7
+				center + (barTemp - 1) * barwidth + xp, 0 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v2
 
-				400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,  1, 1, 1,              // v7 (bottom)
-				400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,   1, 1, 1,              // v4
-				400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v3
-				400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v2
+				center + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,  1, 1, 1,              // v7 (bottom)
+				center + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,   1, 1, 1,              // v4
+				center + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v3
+				center + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v2
 
-				400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v4 (back)
-				400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v7
-				400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,  1, 1, 1,              // v6
-				400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,  1, 1, 1 };            // v5
+				center + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v4 (back)
+				center + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v7
+				center + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,  1, 1, 1,              // v6
+				center + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,  1, 1, 1 };            // v5
 			memcpy(vertices1, verticesTemp1, sizeof(verticesTemp1));
 
 			barTemp = bars[2];
@@ -1820,35 +1828,35 @@ void display() {
 			glEnd();
 			*/
 
-			GLfloat verticesTemp2[216] = { 400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v0 (front)
-				400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v1
-				400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,  1, 1, 1,              // v2
-				400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,              // v3
+			GLfloat verticesTemp2[216] = { center + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v0 (front)
+				center + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v1
+				center + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,  1, 1, 1,              // v2
+				center + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,              // v3
 
-				400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   1, 0, 0,   1, 1, 1,              // v0 (right)
-				400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   1, 0, 0,  1, 1, 1,              // v3
-				400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   1, 0, 0,   1, 1, 1,              // v4
-				400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   1, 0, 0,   1, 1, 1,              // v5
+				center + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   1, 0, 0,   1, 1, 1,              // v0 (right)
+				center + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   1, 0, 0,  1, 1, 1,              // v3
+				center + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   1, 0, 0,   1, 1, 1,              // v4
+				center + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   1, 0, 0,   1, 1, 1,              // v5
 
-				400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v0 (top)
-				400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,  0, 1, 0,    1, 1, 1,              // v5
-				400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 1, 0,   1, 1, 1,              // v6
-				400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v1
+				center + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v0 (top)
+				center + (barTemp + 1) * barwidth + xp, 800 + yp, -10,  0, 1, 0,    1, 1, 1,              // v5
+				center + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 1, 0,   1, 1, 1,              // v6
+				center + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v1
 
-				400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v1 (left)
-				400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,  -1, 0, 0,   1, 1, 1,              // v6
-				400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,  -1, 0, 0,  1, 1, 1,              // v7
-				400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,  -1, 0, 0,  1, 1, 1,              // v2
+				center + (barTemp - 1) * barwidth + xp, 800 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v1 (left)
+				center + (barTemp - 1) * barwidth + xp, 800 + yp, -10,  -1, 0, 0,   1, 1, 1,              // v6
+				center + (barTemp - 1) * barwidth + xp, 0 + yp, -10,  -1, 0, 0,  1, 1, 1,              // v7
+				center + (barTemp - 1) * barwidth + xp, 0 + yp, 0,  -1, 0, 0,  1, 1, 1,              // v2
 
-				400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,  1, 1, 1,              // v7 (bottom)
-				400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,  1, 1, 1,              // v4
-				400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v3
-				400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v2
+				center + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,  1, 1, 1,              // v7 (bottom)
+				center + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,  1, 1, 1,              // v4
+				center + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v3
+				center + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v2
 
-				400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v4 (back)
-				400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v7
-				400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,   1, 1, 1,              // v6
-				400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,   1, 1, 1 };            // v5
+				center + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v4 (back)
+				center + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v7
+				center + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,   1, 1, 1,              // v6
+				center + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,   1, 1, 1 };            // v5
 			memcpy(vertices2, verticesTemp2, sizeof(verticesTemp2));
 
 			barTemp = bars[3];
@@ -1864,35 +1872,35 @@ void display() {
 			glEnd();
 			*/
 
-			GLfloat verticesTemp3[216] = { 400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v0 (front)
-				400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v1
-				400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,             // v2
-				400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,              // v3
+			GLfloat verticesTemp3[216] = { center + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v0 (front)
+				center + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v1
+				center + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,             // v2
+				center + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,              // v3
 
-				400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   1, 0, 0,   1, 1, 1,              // v0 (right)
-				400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   1, 0, 0,   1, 1, 1,              // v3
-				400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   1, 0, 0,   1, 1, 1,              // v4
-				400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   1, 0, 0,   1, 1, 1,              // v5
+				center + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   1, 0, 0,   1, 1, 1,              // v0 (right)
+				center + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   1, 0, 0,   1, 1, 1,              // v3
+				center + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   1, 0, 0,   1, 1, 1,              // v4
+				center + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   1, 0, 0,   1, 1, 1,              // v5
 
-				400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v0 (top)
-				400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,  0, 1, 0,   1, 1, 1,              // v5
-				400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 1, 0,  1, 1, 1,              // v6
-				400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v1
+				center + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v0 (top)
+				center + (barTemp + 1) * barwidth + xp, 800 + yp, -10,  0, 1, 0,   1, 1, 1,              // v5
+				center + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 1, 0,  1, 1, 1,              // v6
+				center + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v1
 
-				400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v1 (left)
-				400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,  -1, 0, 0,   1, 1, 1,              // v6
-				400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,  -1, 0, 0,   1, 1, 1,              // v7
-				400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v2
+				center + (barTemp - 1) * barwidth + xp, 800 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v1 (left)
+				center + (barTemp - 1) * barwidth + xp, 800 + yp, -10,  -1, 0, 0,   1, 1, 1,              // v6
+				center + (barTemp - 1) * barwidth + xp, 0 + yp, -10,  -1, 0, 0,   1, 1, 1,              // v7
+				center + (barTemp - 1) * barwidth + xp, 0 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v2
 
-				400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,  1, 1, 1,              // v7 (bottom)
-				400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,   1, 1, 1,              // v4
-				400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,             // v3
-				400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v2
+				center + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,  1, 1, 1,              // v7 (bottom)
+				center + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,   1, 1, 1,              // v4
+				center + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,             // v3
+				center + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v2
 
-				400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v4 (back)
-				400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v7
-				400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,   1, 1, 1,              // v6
-				400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,   1, 1, 1 };            // v5
+				center + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v4 (back)
+				center + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v7
+				center + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,   1, 1, 1,              // v6
+				center + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,   1, 1, 1 };            // v5
 			memcpy(vertices3, verticesTemp3, sizeof(verticesTemp3));
 
 			barTemp = bars[4];
@@ -1908,35 +1916,35 @@ void display() {
 			glEnd();
 			*/
 
-			GLfloat verticesTemp4[216] = { 400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v0 (front)
-				400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v1
-				400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,              // v2
-				400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,             // v3
+			GLfloat verticesTemp4[216] = { center + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v0 (front)
+				center + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v1
+				center + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,              // v2
+				center + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,             // v3
 
-				400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   1, 0, 0,   1, 1, 1,              // v0 (right)
-				400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   1, 0, 0,   1, 1, 1,              // v3
-				400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   1, 0, 0,   1, 1, 1,              // v4
-				400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   1, 0, 0,   1, 1, 1,             // v5
+				center + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   1, 0, 0,   1, 1, 1,              // v0 (right)
+				center + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   1, 0, 0,   1, 1, 1,              // v3
+				center + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   1, 0, 0,   1, 1, 1,              // v4
+				center + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   1, 0, 0,   1, 1, 1,             // v5
 
-				400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v0 (top)
-				400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,  0, 1, 0,    1, 1, 1,              // v5
-				400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 1, 0,   1, 1, 1,              // v6
-				400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v1
+				center + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v0 (top)
+				center + (barTemp + 1) * barwidth + xp, 800 + yp, -10,  0, 1, 0,    1, 1, 1,              // v5
+				center + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 1, 0,   1, 1, 1,              // v6
+				center + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v1
 
-				400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v1 (left)
-				400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,  -1, 0, 0,   1, 1, 1,              // v6
-				400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,  -1, 0, 0,   1, 1, 1,              // v7
-				400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v2
+				center + (barTemp - 1) * barwidth + xp, 800 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v1 (left)
+				center + (barTemp - 1) * barwidth + xp, 800 + yp, -10,  -1, 0, 0,   1, 1, 1,              // v6
+				center + (barTemp - 1) * barwidth + xp, 0 + yp, -10,  -1, 0, 0,   1, 1, 1,              // v7
+				center + (barTemp - 1) * barwidth + xp, 0 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v2
 
-				400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,   1, 1, 1,              // v7 (bottom)
-				400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,   1, 1, 1,              // v4
-				400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v3
-				400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v2
+				center + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,   1, 1, 1,              // v7 (bottom)
+				center + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,   1, 1, 1,              // v4
+				center + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v3
+				center + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v2
 
-				400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v4 (back)
-				400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v7
-				400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,   1, 1, 1,              // v6
-				400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,   1, 1, 1 };            // v5
+				center + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v4 (back)
+				center + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v7
+				center + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,   1, 1, 1,              // v6
+				center + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,   1, 1, 1 };            // v5
 			memcpy(vertices4, verticesTemp4, sizeof(verticesTemp4));
 
 			barTemp = bars[5];
@@ -1952,35 +1960,35 @@ void display() {
 			glEnd();
 			*/
 
-			GLfloat verticesTemp5[216] = { 400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v0 (front)
-				400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v1
-				400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,              // v2
-				400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,             // v3
+			GLfloat verticesTemp5[216] = { center + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v0 (front)
+				center + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v1
+				center + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,              // v2
+				center + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,             // v3
 
-				400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   1, 0, 0,   1, 1, 1,              // v0 (right)
-				400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   1, 0, 0,   1, 1, 1,              // v3
-				400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   1, 0, 0,   1, 1, 1,              // v4
-				400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   1, 0, 0,   1, 1, 1,             // v5
+				center + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   1, 0, 0,   1, 1, 1,              // v0 (right)
+				center + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   1, 0, 0,   1, 1, 1,              // v3
+				center + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   1, 0, 0,   1, 1, 1,              // v4
+				center + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   1, 0, 0,   1, 1, 1,             // v5
 
-				400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v0 (top)
-				400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,  0, 1, 0,    1, 1, 1,              // v5
-				400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 1, 0,   1, 1, 1,              // v6
-				400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v1
+				center + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v0 (top)
+				center + (barTemp + 1) * barwidth + xp, 800 + yp, -10,  0, 1, 0,    1, 1, 1,              // v5
+				center + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 1, 0,   1, 1, 1,              // v6
+				center + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v1
 
-				400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v1 (left)
-				400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,  -1, 0, 0,   1, 1, 1,              // v6
-				400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,  -1, 0, 0,   1, 1, 1,              // v7
-				400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v2
+				center + (barTemp - 1) * barwidth + xp, 800 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v1 (left)
+				center + (barTemp - 1) * barwidth + xp, 800 + yp, -10,  -1, 0, 0,   1, 1, 1,              // v6
+				center + (barTemp - 1) * barwidth + xp, 0 + yp, -10,  -1, 0, 0,   1, 1, 1,              // v7
+				center + (barTemp - 1) * barwidth + xp, 0 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v2
 
-				400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,   1, 1, 1,              // v7 (bottom)
-				400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,   1, 1, 1,              // v4
-				400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v3
-				400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v2
+				center + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,   1, 1, 1,              // v7 (bottom)
+				center + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,   1, 1, 1,              // v4
+				center + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v3
+				center + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v2
 
-				400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v4 (back)
-				400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v7
-				400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,   1, 1, 1,              // v6
-				400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,   1, 1, 1 };            // v5
+				center + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v4 (back)
+				center + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v7
+				center + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,   1, 1, 1,              // v6
+				center + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,   1, 1, 1 };            // v5
 			memcpy(vertices5, verticesTemp5, sizeof(verticesTemp5));
 
 			barTemp = bars[6];
@@ -1996,35 +2004,35 @@ void display() {
 			glEnd();
 			*/
 
-			GLfloat verticesTemp6[216] = { 400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v0 (front)
-				400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v1
-				400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,              // v2
-				400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,             // v3
+			GLfloat verticesTemp6[216] = { center + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v0 (front)
+				center + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v1
+				center + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,              // v2
+				center + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,             // v3
 
-				400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   1, 0, 0,   1, 1, 1,              // v0 (right)
-				400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   1, 0, 0,   1, 1, 1,              // v3
-				400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   1, 0, 0,   1, 1, 1,              // v4
-				400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   1, 0, 0,   1, 1, 1,             // v5
+				center + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   1, 0, 0,   1, 1, 1,              // v0 (right)
+				center + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   1, 0, 0,   1, 1, 1,              // v3
+				center + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   1, 0, 0,   1, 1, 1,              // v4
+				center + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   1, 0, 0,   1, 1, 1,             // v5
 
-				400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v0 (top)
-				400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,  0, 1, 0,    1, 1, 1,              // v5
-				400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 1, 0,   1, 1, 1,              // v6
-				400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v1
+				center + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v0 (top)
+				center + (barTemp + 1) * barwidth + xp, 800 + yp, -10,  0, 1, 0,    1, 1, 1,              // v5
+				center + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 1, 0,   1, 1, 1,              // v6
+				center + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v1
 
-				400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v1 (left)
-				400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,  -1, 0, 0,   1, 1, 1,              // v6
-				400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,  -1, 0, 0,   1, 1, 1,              // v7
-				400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v2
+				center + (barTemp - 1) * barwidth + xp, 800 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v1 (left)
+				center + (barTemp - 1) * barwidth + xp, 800 + yp, -10,  -1, 0, 0,   1, 1, 1,              // v6
+				center + (barTemp - 1) * barwidth + xp, 0 + yp, -10,  -1, 0, 0,   1, 1, 1,              // v7
+				center + (barTemp - 1) * barwidth + xp, 0 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v2
 
-				400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,   1, 1, 1,              // v7 (bottom)
-				400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,   1, 1, 1,              // v4
-				400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v3
-				400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v2
+				center + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,   1, 1, 1,              // v7 (bottom)
+				center + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,   1, 1, 1,              // v4
+				center + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v3
+				center + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v2
 
-				400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v4 (back)
-				400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v7
-				400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,   1, 1, 1,              // v6
-				400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,   1, 1, 1 };            // v5
+				center + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v4 (back)
+				center + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v7
+				center + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,   1, 1, 1,              // v6
+				center + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,   1, 1, 1 };            // v5
 			memcpy(vertices6, verticesTemp6, sizeof(verticesTemp6));
 
 			barTemp = bars[7];
@@ -2040,35 +2048,35 @@ void display() {
 			glEnd();
 			*/
 
-			GLfloat verticesTemp7[216] = { 400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v0 (front)
-				400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v1
-				400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,              // v2
-				400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,             // v3
+			GLfloat verticesTemp7[216] = { center + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v0 (front)
+				center + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v1
+				center + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,              // v2
+				center + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,             // v3
 
-				400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   1, 0, 0,   1, 1, 1,              // v0 (right)
-				400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   1, 0, 0,   1, 1, 1,              // v3
-				400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   1, 0, 0,   1, 1, 1,              // v4
-				400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   1, 0, 0,   1, 1, 1,             // v5
+				center + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   1, 0, 0,   1, 1, 1,              // v0 (right)
+				center + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   1, 0, 0,   1, 1, 1,              // v3
+				center + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   1, 0, 0,   1, 1, 1,              // v4
+				center + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   1, 0, 0,   1, 1, 1,             // v5
 
-				400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v0 (top)
-				400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,  0, 1, 0,    1, 1, 1,              // v5
-				400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 1, 0,   1, 1, 1,              // v6
-				400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v1
+				center + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v0 (top)
+				center + (barTemp + 1) * barwidth + xp, 800 + yp, -10,  0, 1, 0,    1, 1, 1,              // v5
+				center + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 1, 0,   1, 1, 1,              // v6
+				center + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v1
 
-				400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v1 (left)
-				400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,  -1, 0, 0,   1, 1, 1,              // v6
-				400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,  -1, 0, 0,   1, 1, 1,              // v7
-				400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v2
+				center + (barTemp - 1) * barwidth + xp, 800 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v1 (left)
+				center + (barTemp - 1) * barwidth + xp, 800 + yp, -10,  -1, 0, 0,   1, 1, 1,              // v6
+				center + (barTemp - 1) * barwidth + xp, 0 + yp, -10,  -1, 0, 0,   1, 1, 1,              // v7
+				center + (barTemp - 1) * barwidth + xp, 0 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v2
 
-				400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,   1, 1, 1,              // v7 (bottom)
-				400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,   1, 1, 1,              // v4
-				400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v3
-				400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v2
+				center + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,   1, 1, 1,              // v7 (bottom)
+				center + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,   1, 1, 1,              // v4
+				center + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v3
+				center + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v2
 
-				400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v4 (back)
-				400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v7
-				400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,   1, 1, 1,              // v6
-				400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,   1, 1, 1 };            // v5
+				center + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v4 (back)
+				center + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v7
+				center + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,   1, 1, 1,              // v6
+				center + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,   1, 1, 1 };            // v5
 			memcpy(vertices7, verticesTemp7, sizeof(verticesTemp7));
 
 			barTemp = bars[8];
@@ -2084,35 +2092,35 @@ void display() {
 			glEnd();
 			*/
 
-			GLfloat verticesTemp8[216] = { 400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v0 (front)
-				400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v1
-				400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,              // v2
-				400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,             // v3
+			GLfloat verticesTemp8[216] = { center + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v0 (front)
+				center + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v1
+				center + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,              // v2
+				center + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,             // v3
 
-				400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   1, 0, 0,   1, 1, 1,              // v0 (right)
-				400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   1, 0, 0,   1, 1, 1,              // v3
-				400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   1, 0, 0,   1, 1, 1,              // v4
-				400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   1, 0, 0,   1, 1, 1,             // v5
+				center + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   1, 0, 0,   1, 1, 1,              // v0 (right)
+				center + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   1, 0, 0,   1, 1, 1,              // v3
+				center + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   1, 0, 0,   1, 1, 1,              // v4
+				center + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   1, 0, 0,   1, 1, 1,             // v5
 
-				400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v0 (top)
-				400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,  0, 1, 0,    1, 1, 1,              // v5
-				400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 1, 0,   1, 1, 1,              // v6
-				400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v1
+				center + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v0 (top)
+				center + (barTemp + 1) * barwidth + xp, 800 + yp, -10,  0, 1, 0,    1, 1, 1,              // v5
+				center + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 1, 0,   1, 1, 1,              // v6
+				center + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v1
 
-				400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v1 (left)
-				400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,  -1, 0, 0,   1, 1, 1,              // v6
-				400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,  -1, 0, 0,   1, 1, 1,              // v7
-				400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v2
+				center + (barTemp - 1) * barwidth + xp, 800 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v1 (left)
+				center + (barTemp - 1) * barwidth + xp, 800 + yp, -10,  -1, 0, 0,   1, 1, 1,              // v6
+				center + (barTemp - 1) * barwidth + xp, 0 + yp, -10,  -1, 0, 0,   1, 1, 1,              // v7
+				center + (barTemp - 1) * barwidth + xp, 0 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v2
 
-				400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,   1, 1, 1,              // v7 (bottom)
-				400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,   1, 1, 1,              // v4
-				400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v3
-				400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v2
+				center + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,   1, 1, 1,              // v7 (bottom)
+				center + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,   1, 1, 1,              // v4
+				center + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v3
+				center + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v2
 
-				400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v4 (back)
-				400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v7
-				400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,   1, 1, 1,              // v6
-				400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,   1, 1, 1 };            // v5
+				center + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v4 (back)
+				center + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v7
+				center + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,   1, 1, 1,              // v6
+				center + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,   1, 1, 1 };            // v5
 			memcpy(vertices8, verticesTemp8, sizeof(verticesTemp8));
 
 			barTemp = bars[9];
@@ -2128,35 +2136,35 @@ void display() {
 			glEnd();
 			*/
 
-			GLfloat verticesTemp9[216] = { 400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v0 (front)
-				400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v1
-				400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,              // v2
-				400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,             // v3
+			GLfloat verticesTemp9[216] = { center + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v0 (front)
+				center + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v1
+				center + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,              // v2
+				center + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,             // v3
 
-				400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   1, 0, 0,   1, 1, 1,              // v0 (right)
-				400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   1, 0, 0,   1, 1, 1,              // v3
-				400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   1, 0, 0,   1, 1, 1,              // v4
-				400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   1, 0, 0,   1, 1, 1,             // v5
+				center + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   1, 0, 0,   1, 1, 1,              // v0 (right)
+				center + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   1, 0, 0,   1, 1, 1,              // v3
+				center + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   1, 0, 0,   1, 1, 1,              // v4
+				center + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   1, 0, 0,   1, 1, 1,             // v5
 
-				400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v0 (top)
-				400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,  0, 1, 0,    1, 1, 1,              // v5
-				400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 1, 0,   1, 1, 1,              // v6
-				400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v1
+				center + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v0 (top)
+				center + (barTemp + 1) * barwidth + xp, 800 + yp, -10,  0, 1, 0,    1, 1, 1,              // v5
+				center + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 1, 0,   1, 1, 1,              // v6
+				center + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v1
 
-				400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v1 (left)
-				400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,  -1, 0, 0,   1, 1, 1,              // v6
-				400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,  -1, 0, 0,   1, 1, 1,              // v7
-				400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v2
+				center + (barTemp - 1) * barwidth + xp, 800 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v1 (left)
+				center + (barTemp - 1) * barwidth + xp, 800 + yp, -10,  -1, 0, 0,   1, 1, 1,              // v6
+				center + (barTemp - 1) * barwidth + xp, 0 + yp, -10,  -1, 0, 0,   1, 1, 1,              // v7
+				center + (barTemp - 1) * barwidth + xp, 0 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v2
 
-				400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,   1, 1, 1,              // v7 (bottom)
-				400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,   1, 1, 1,              // v4
-				400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v3
-				400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v2
+				center + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,   1, 1, 1,              // v7 (bottom)
+				center + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,   1, 1, 1,              // v4
+				center + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v3
+				center + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v2
 
-				400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v4 (back)
-				400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v7
-				400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,   1, 1, 1,              // v6
-				400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,   1, 1, 1 };            // v5
+				center + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v4 (back)
+				center + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v7
+				center + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,   1, 1, 1,              // v6
+				center + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,   1, 1, 1 };            // v5
 			memcpy(vertices9, verticesTemp9, sizeof(verticesTemp9));
 
 			barTemp = bars[10];
@@ -2172,35 +2180,35 @@ void display() {
 			glEnd();
 			*/
 
-			GLfloat verticesTemp10[216] = { 400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v0 (front)
-				400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v1
-				400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,              // v2
-				400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,             // v3
+			GLfloat verticesTemp10[216] = { center + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v0 (front)
+				center + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v1
+				center + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,              // v2
+				center + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,             // v3
 
-				400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   1, 0, 0,   1, 1, 1,              // v0 (right)
-				400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   1, 0, 0,   1, 1, 1,              // v3
-				400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   1, 0, 0,   1, 1, 1,              // v4
-				400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   1, 0, 0,   1, 1, 1,             // v5
+				center + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   1, 0, 0,   1, 1, 1,              // v0 (right)
+				center + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   1, 0, 0,   1, 1, 1,              // v3
+				center + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   1, 0, 0,   1, 1, 1,              // v4
+				center + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   1, 0, 0,   1, 1, 1,             // v5
 
-				400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v0 (top)
-				400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,  0, 1, 0,    1, 1, 1,              // v5
-				400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 1, 0,   1, 1, 1,              // v6
-				400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v1
+				center + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v0 (top)
+				center + (barTemp + 1) * barwidth + xp, 800 + yp, -10,  0, 1, 0,    1, 1, 1,              // v5
+				center + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 1, 0,   1, 1, 1,              // v6
+				center + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v1
 
-				400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v1 (left)
-				400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,  -1, 0, 0,   1, 1, 1,              // v6
-				400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,  -1, 0, 0,   1, 1, 1,              // v7
-				400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v2
+				center + (barTemp - 1) * barwidth + xp, 800 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v1 (left)
+				center + (barTemp - 1) * barwidth + xp, 800 + yp, -10,  -1, 0, 0,   1, 1, 1,              // v6
+				center + (barTemp - 1) * barwidth + xp, 0 + yp, -10,  -1, 0, 0,   1, 1, 1,              // v7
+				center + (barTemp - 1) * barwidth + xp, 0 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v2
 
-				400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,   1, 1, 1,              // v7 (bottom)
-				400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,   1, 1, 1,              // v4
-				400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v3
-				400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v2
+				center + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,   1, 1, 1,              // v7 (bottom)
+				center + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,   1, 1, 1,              // v4
+				center + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v3
+				center + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v2
 
-				400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v4 (back)
-				400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v7
-				400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,   1, 1, 1,              // v6
-				400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,   1, 1, 1 };            // v5
+				center + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v4 (back)
+				center + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v7
+				center + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,   1, 1, 1,              // v6
+				center + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,   1, 1, 1 };            // v5
 			memcpy(vertices10, verticesTemp10, sizeof(verticesTemp10));
 
 			barTemp = bars[11];
@@ -2216,35 +2224,35 @@ void display() {
 			glEnd();
 			*/
 
-			GLfloat verticesTemp11[216] = { 400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v0 (front)
-				400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v1
-				400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,              // v2
-				400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,             // v3
+			GLfloat verticesTemp11[216] = { center + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v0 (front)
+				center + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v1
+				center + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,              // v2
+				center + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,             // v3
 
-				400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   1, 0, 0,   1, 1, 1,              // v0 (right)
-				400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   1, 0, 0,   1, 1, 1,              // v3
-				400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   1, 0, 0,   1, 1, 1,              // v4
-				400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   1, 0, 0,   1, 1, 1,             // v5
+				center + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   1, 0, 0,   1, 1, 1,              // v0 (right)
+				center + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   1, 0, 0,   1, 1, 1,              // v3
+				center + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   1, 0, 0,   1, 1, 1,              // v4
+				center + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   1, 0, 0,   1, 1, 1,             // v5
 
-				400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v0 (top)
-				400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,  0, 1, 0,    1, 1, 1,              // v5
-				400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 1, 0,   1, 1, 1,              // v6
-				400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v1
+				center + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v0 (top)
+				center + (barTemp + 1) * barwidth + xp, 800 + yp, -10,  0, 1, 0,    1, 1, 1,              // v5
+				center + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 1, 0,   1, 1, 1,              // v6
+				center + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v1
 
-				400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v1 (left)
-				400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,  -1, 0, 0,   1, 1, 1,              // v6
-				400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,  -1, 0, 0,   1, 1, 1,              // v7
-				400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v2
+				center + (barTemp - 1) * barwidth + xp, 800 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v1 (left)
+				center + (barTemp - 1) * barwidth + xp, 800 + yp, -10,  -1, 0, 0,   1, 1, 1,              // v6
+				center + (barTemp - 1) * barwidth + xp, 0 + yp, -10,  -1, 0, 0,   1, 1, 1,              // v7
+				center + (barTemp - 1) * barwidth + xp, 0 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v2
 
-				400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,   1, 1, 1,              // v7 (bottom)
-				400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,   1, 1, 1,              // v4
-				400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v3
-				400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v2
+				center + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,   1, 1, 1,              // v7 (bottom)
+				center + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,   1, 1, 1,              // v4
+				center + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v3
+				center + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v2
 
-				400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v4 (back)
-				400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v7
-				400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,   1, 1, 1,              // v6
-				400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,   1, 1, 1 };            // v5
+				center + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v4 (back)
+				center + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v7
+				center + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,   1, 1, 1,              // v6
+				center + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,   1, 1, 1 };            // v5
 			memcpy(vertices11, verticesTemp11, sizeof(verticesTemp11));
 
 			barTemp = bars[12];
@@ -2260,35 +2268,35 @@ void display() {
 			glEnd();
 			*/
 
-			GLfloat verticesTemp12[216] = { 400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v0 (front)
-				400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v1
-				400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,              // v2
-				400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,             // v3
+			GLfloat verticesTemp12[216] = { center + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v0 (front)
+				center + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v1
+				center + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,              // v2
+				center + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,             // v3
 
-				400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   1, 0, 0,   1, 1, 1,              // v0 (right)
-				400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   1, 0, 0,   1, 1, 1,              // v3
-				400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   1, 0, 0,   1, 1, 1,              // v4
-				400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   1, 0, 0,   1, 1, 1,             // v5
+				center + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   1, 0, 0,   1, 1, 1,              // v0 (right)
+				center + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   1, 0, 0,   1, 1, 1,              // v3
+				center + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   1, 0, 0,   1, 1, 1,              // v4
+				center + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   1, 0, 0,   1, 1, 1,             // v5
 
-				400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v0 (top)
-				400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,  0, 1, 0,    1, 1, 1,              // v5
-				400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 1, 0,   1, 1, 1,              // v6
-				400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v1
+				center + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v0 (top)
+				center + (barTemp + 1) * barwidth + xp, 800 + yp, -10,  0, 1, 0,    1, 1, 1,              // v5
+				center + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 1, 0,   1, 1, 1,              // v6
+				center + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v1
 
-				400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v1 (left)
-				400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,  -1, 0, 0,   1, 1, 1,              // v6
-				400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,  -1, 0, 0,   1, 1, 1,              // v7
-				400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v2
+				center + (barTemp - 1) * barwidth + xp, 800 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v1 (left)
+				center + (barTemp - 1) * barwidth + xp, 800 + yp, -10,  -1, 0, 0,   1, 1, 1,              // v6
+				center + (barTemp - 1) * barwidth + xp, 0 + yp, -10,  -1, 0, 0,   1, 1, 1,              // v7
+				center + (barTemp - 1) * barwidth + xp, 0 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v2
 
-				400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,   1, 1, 1,              // v7 (bottom)
-				400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,   1, 1, 1,              // v4
-				400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v3
-				400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v2
+				center + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,   1, 1, 1,              // v7 (bottom)
+				center + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,   1, 1, 1,              // v4
+				center + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v3
+				center + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v2
 
-				400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v4 (back)
-				400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v7
-				400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,   1, 1, 1,              // v6
-				400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,   1, 1, 1 };            // v5
+				center + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v4 (back)
+				center + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v7
+				center + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,   1, 1, 1,              // v6
+				center + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,   1, 1, 1 };            // v5
 			memcpy(vertices12, verticesTemp12, sizeof(verticesTemp12));
 
 			barTemp = bars[13];
@@ -2304,35 +2312,35 @@ void display() {
 			glEnd();
 			*/
 
-			GLfloat verticesTemp13[216] = { 400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v0 (front)
-				400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v1
-				400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,              // v2
-				400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,             // v3
+			GLfloat verticesTemp13[216] = { center + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v0 (front)
+				center + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v1
+				center + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,              // v2
+				center + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,             // v3
 
-				400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   1, 0, 0,   1, 1, 1,              // v0 (right)
-				400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   1, 0, 0,   1, 1, 1,              // v3
-				400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   1, 0, 0,   1, 1, 1,              // v4
-				400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   1, 0, 0,   1, 1, 1,             // v5
+				center + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   1, 0, 0,   1, 1, 1,              // v0 (right)
+				center + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   1, 0, 0,   1, 1, 1,              // v3
+				center + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   1, 0, 0,   1, 1, 1,              // v4
+				center + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   1, 0, 0,   1, 1, 1,             // v5
 
-				400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v0 (top)
-				400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,  0, 1, 0,    1, 1, 1,              // v5
-				400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 1, 0,   1, 1, 1,              // v6
-				400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v1
+				center + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v0 (top)
+				center + (barTemp + 1) * barwidth + xp, 800 + yp, -10,  0, 1, 0,    1, 1, 1,              // v5
+				center + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 1, 0,   1, 1, 1,              // v6
+				center + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v1
 
-				400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v1 (left)
-				400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,  -1, 0, 0,   1, 1, 1,              // v6
-				400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,  -1, 0, 0,   1, 1, 1,              // v7
-				400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v2
+				center + (barTemp - 1) * barwidth + xp, 800 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v1 (left)
+				center + (barTemp - 1) * barwidth + xp, 800 + yp, -10,  -1, 0, 0,   1, 1, 1,              // v6
+				center + (barTemp - 1) * barwidth + xp, 0 + yp, -10,  -1, 0, 0,   1, 1, 1,              // v7
+				center + (barTemp - 1) * barwidth + xp, 0 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v2
 
-				400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,   1, 1, 1,              // v7 (bottom)
-				400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,   1, 1, 1,              // v4
-				400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v3
-				400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v2
+				center + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,   1, 1, 1,              // v7 (bottom)
+				center + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,   1, 1, 1,              // v4
+				center + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v3
+				center + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v2
 
-				400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v4 (back)
-				400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v7
-				400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,   1, 1, 1,              // v6
-				400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,   1, 1, 1 };            // v5
+				center + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v4 (back)
+				center + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v7
+				center + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,   1, 1, 1,              // v6
+				center + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,   1, 1, 1 };            // v5
 			memcpy(vertices13, verticesTemp13, sizeof(verticesTemp13));
 
 			barTemp = bars[14];
@@ -2348,35 +2356,35 @@ void display() {
 			glEnd();
 			*/
 
-			GLfloat verticesTemp14[216] = { 400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v0 (front)
-				400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v1
-				400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,              // v2
-				400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,             // v3
+			GLfloat verticesTemp14[216] = { center + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v0 (front)
+				center + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v1
+				center + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,              // v2
+				center + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,             // v3
 
-				400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   1, 0, 0,   1, 1, 1,              // v0 (right)
-				400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   1, 0, 0,   1, 1, 1,              // v3
-				400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   1, 0, 0,   1, 1, 1,              // v4
-				400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   1, 0, 0,   1, 1, 1,             // v5
+				center + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   1, 0, 0,   1, 1, 1,              // v0 (right)
+				center + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   1, 0, 0,   1, 1, 1,              // v3
+				center + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   1, 0, 0,   1, 1, 1,              // v4
+				center + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   1, 0, 0,   1, 1, 1,             // v5
 
-				400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v0 (top)
-				400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,  0, 1, 0,    1, 1, 1,              // v5
-				400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 1, 0,   1, 1, 1,              // v6
-				400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v1
+				center + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v0 (top)
+				center + (barTemp + 1) * barwidth + xp, 800 + yp, -10,  0, 1, 0,    1, 1, 1,              // v5
+				center + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 1, 0,   1, 1, 1,              // v6
+				center + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v1
 
-				400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v1 (left)
-				400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,  -1, 0, 0,   1, 1, 1,              // v6
-				400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,  -1, 0, 0,   1, 1, 1,              // v7
-				400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v2
+				center + (barTemp - 1) * barwidth + xp, 800 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v1 (left)
+				center + (barTemp - 1) * barwidth + xp, 800 + yp, -10,  -1, 0, 0,   1, 1, 1,              // v6
+				center + (barTemp - 1) * barwidth + xp, 0 + yp, -10,  -1, 0, 0,   1, 1, 1,              // v7
+				center + (barTemp - 1) * barwidth + xp, 0 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v2
 
-				400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,   1, 1, 1,              // v7 (bottom)
-				400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,   1, 1, 1,              // v4
-				400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v3
-				400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v2
+				center + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,   1, 1, 1,              // v7 (bottom)
+				center + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,   1, 1, 1,              // v4
+				center + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v3
+				center + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v2
 
-				400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v4 (back)
-				400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v7
-				400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,   1, 1, 1,              // v6
-				400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,   1, 1, 1 };            // v5
+				center + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v4 (back)
+				center + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v7
+				center + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,   1, 1, 1,              // v6
+				center + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,   1, 1, 1 };            // v5
 			memcpy(vertices14, verticesTemp14, sizeof(verticesTemp14));
 
 			barTemp = bars[15];
@@ -2392,35 +2400,35 @@ void display() {
 			glEnd();
 			*/
 
-			GLfloat verticesTemp15[216] = { 400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v0 (front)
-				400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v1
-				400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,              // v2
-				400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,             // v3
+			GLfloat verticesTemp15[216] = { center + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v0 (front)
+				center + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v1
+				center + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,              // v2
+				center + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,             // v3
 
-				400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   1, 0, 0,   1, 1, 1,              // v0 (right)
-				400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   1, 0, 0,   1, 1, 1,              // v3
-				400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   1, 0, 0,   1, 1, 1,              // v4
-				400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   1, 0, 0,   1, 1, 1,             // v5
+				center + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   1, 0, 0,   1, 1, 1,              // v0 (right)
+				center + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   1, 0, 0,   1, 1, 1,              // v3
+				center + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   1, 0, 0,   1, 1, 1,              // v4
+				center + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   1, 0, 0,   1, 1, 1,             // v5
 
-				400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v0 (top)
-				400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,  0, 1, 0,    1, 1, 1,              // v5
-				400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 1, 0,   1, 1, 1,              // v6
-				400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v1
+				center + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v0 (top)
+				center + (barTemp + 1) * barwidth + xp, 800 + yp, -10,  0, 1, 0,    1, 1, 1,              // v5
+				center + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 1, 0,   1, 1, 1,              // v6
+				center + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v1
 
-				400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v1 (left)
-				400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,  -1, 0, 0,   1, 1, 1,              // v6
-				400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,  -1, 0, 0,   1, 1, 1,              // v7
-				400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v2
+				center + (barTemp - 1) * barwidth + xp, 800 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v1 (left)
+				center + (barTemp - 1) * barwidth + xp, 800 + yp, -10,  -1, 0, 0,   1, 1, 1,              // v6
+				center + (barTemp - 1) * barwidth + xp, 0 + yp, -10,  -1, 0, 0,   1, 1, 1,              // v7
+				center + (barTemp - 1) * barwidth + xp, 0 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v2
 
-				400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,   1, 1, 1,              // v7 (bottom)
-				400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,   1, 1, 1,              // v4
-				400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v3
-				400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v2
+				center + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,   1, 1, 1,              // v7 (bottom)
+				center + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,   1, 1, 1,              // v4
+				center + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v3
+				center + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v2
 
-				400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v4 (back)
-				400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v7
-				400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,   1, 1, 1,              // v6
-				400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,   1, 1, 1 };            // v5
+				center + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v4 (back)
+				center + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v7
+				center + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,   1, 1, 1,              // v6
+				center + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,   1, 1, 1 };            // v5
 			memcpy(vertices15, verticesTemp15, sizeof(verticesTemp15));
 
 			barTemp = bars[16];
@@ -2436,35 +2444,35 @@ void display() {
 			glEnd();
 			*/
 
-			GLfloat verticesTemp16[216] = { 400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v0 (front)
-				400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v1
-				400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,              // v2
-				400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,             // v3
+			GLfloat verticesTemp16[216] = { center + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v0 (front)
+				center + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v1
+				center + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,              // v2
+				center + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,             // v3
 
-				400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   1, 0, 0,   1, 1, 1,              // v0 (right)
-				400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   1, 0, 0,   1, 1, 1,              // v3
-				400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   1, 0, 0,   1, 1, 1,              // v4
-				400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   1, 0, 0,   1, 1, 1,             // v5
+				center + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   1, 0, 0,   1, 1, 1,              // v0 (right)
+				center + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   1, 0, 0,   1, 1, 1,              // v3
+				center + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   1, 0, 0,   1, 1, 1,              // v4
+				center + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   1, 0, 0,   1, 1, 1,             // v5
 
-				400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v0 (top)
-				400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,  0, 1, 0,    1, 1, 1,              // v5
-				400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 1, 0,   1, 1, 1,              // v6
-				400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v1
+				center + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v0 (top)
+				center + (barTemp + 1) * barwidth + xp, 800 + yp, -10,  0, 1, 0,    1, 1, 1,              // v5
+				center + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 1, 0,   1, 1, 1,              // v6
+				center + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v1
 
-				400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v1 (left)
-				400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,  -1, 0, 0,   1, 1, 1,              // v6
-				400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,  -1, 0, 0,   1, 1, 1,              // v7
-				400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v2
+				center + (barTemp - 1) * barwidth + xp, 800 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v1 (left)
+				center + (barTemp - 1) * barwidth + xp, 800 + yp, -10,  -1, 0, 0,   1, 1, 1,              // v6
+				center + (barTemp - 1) * barwidth + xp, 0 + yp, -10,  -1, 0, 0,   1, 1, 1,              // v7
+				center + (barTemp - 1) * barwidth + xp, 0 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v2
 
-				400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,   1, 1, 1,              // v7 (bottom)
-				400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,   1, 1, 1,              // v4
-				400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v3
-				400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v2
+				center + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,   1, 1, 1,              // v7 (bottom)
+				center + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,   1, 1, 1,              // v4
+				center + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v3
+				center + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v2
 
-				400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v4 (back)
-				400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v7
-				400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,   1, 1, 1,              // v6
-				400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,   1, 1, 1 };            // v5
+				center + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v4 (back)
+				center + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v7
+				center + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,   1, 1, 1,              // v6
+				center + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,   1, 1, 1 };            // v5
 			memcpy(vertices16, verticesTemp16, sizeof(verticesTemp16));
 
 			barTemp = bars[17];
@@ -2480,35 +2488,35 @@ void display() {
 			glEnd();
 			*/
 
-			GLfloat verticesTemp17[216] = { 400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v0 (front)
-				400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v1
-				400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,              // v2
-				400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,             // v3
+			GLfloat verticesTemp17[216] = { center + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v0 (front)
+				center + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 0, 1,   1, 1, 1,              // v1
+				center + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,              // v2
+				center + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0, 0, 1,   1, 1, 1,             // v3
 
-				400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   1, 0, 0,   1, 1, 1,              // v0 (right)
-				400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   1, 0, 0,   1, 1, 1,              // v3
-				400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   1, 0, 0,   1, 1, 1,              // v4
-				400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   1, 0, 0,   1, 1, 1,             // v5
+				center + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   1, 0, 0,   1, 1, 1,              // v0 (right)
+				center + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   1, 0, 0,   1, 1, 1,              // v3
+				center + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   1, 0, 0,   1, 1, 1,              // v4
+				center + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   1, 0, 0,   1, 1, 1,             // v5
 
-				400 + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v0 (top)
-				400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,  0, 1, 0,    1, 1, 1,              // v5
-				400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 1, 0,   1, 1, 1,              // v6
-				400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v1
+				center + (barTemp + 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v0 (top)
+				center + (barTemp + 1) * barwidth + xp, 800 + yp, -10,  0, 1, 0,    1, 1, 1,              // v5
+				center + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 1, 0,   1, 1, 1,              // v6
+				center + (barTemp - 1) * barwidth + xp, 800 + yp, 0,   0, 1, 0,   1, 1, 1,              // v1
 
-				400 + (barTemp - 1) * barwidth + xp, 800 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v1 (left)
-				400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,  -1, 0, 0,   1, 1, 1,              // v6
-				400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,  -1, 0, 0,   1, 1, 1,              // v7
-				400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v2
+				center + (barTemp - 1) * barwidth + xp, 800 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v1 (left)
+				center + (barTemp - 1) * barwidth + xp, 800 + yp, -10,  -1, 0, 0,   1, 1, 1,              // v6
+				center + (barTemp - 1) * barwidth + xp, 0 + yp, -10,  -1, 0, 0,   1, 1, 1,              // v7
+				center + (barTemp - 1) * barwidth + xp, 0 + yp, 0,  -1, 0, 0,   1, 1, 1,              // v2
 
-				400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,   1, 1, 1,              // v7 (bottom)
-				400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,   1, 1, 1,              // v4
-				400 + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v3
-				400 + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v2
+				center + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,   1, 1, 1,              // v7 (bottom)
+				center + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0,-1, 0,   1, 1, 1,              // v4
+				center + (barTemp + 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v3
+				center + (barTemp - 1) * barwidth + xp, 0 + yp, 0,   0,-1, 0,   1, 1, 1,              // v2
 
-				400 + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v4 (back)
-				400 + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v7
-				400 + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,   1, 1, 1,              // v6
-				400 + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,   1, 1, 1 };            // v5
+				center + (barTemp + 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v4 (back)
+				center + (barTemp - 1) * barwidth + xp, 0 + yp, -10,   0, 0,-1,   1, 1, 1,              // v7
+				center + (barTemp - 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,   1, 1, 1,              // v6
+				center + (barTemp + 1) * barwidth + xp, 800 + yp, -10,   0, 0,-1,   1, 1, 1 };            // v5
 			memcpy(vertices17, verticesTemp17, sizeof(verticesTemp17));
 			//printf("%f\n", lx);
 			//glEnd();
@@ -2536,12 +2544,14 @@ void display() {
 		if (horizontal) {
 			gluLookAt(x, 0.0f, z,
 				x, 0.0f, z + lz,
-				1.0f, 0.0f, 0.0f);
+				//1.0f, 0.0f, 0.0f);
+				0.0f, 1.0f, 0.0f);
 		}
 		else {
 			gluLookAt(x, 0.0f, z,
 				x, 0.0f, z + lz,
-				0.0f, 1.0f, 0.0f);
+				//0.0f, 1.0f, 0.0f);
+				1.0f, 0.0f, 0.0f);
 		}
 	}
 	glutSwapBuffers(); //done with current frame. Swap to being on the next.
@@ -2596,6 +2606,9 @@ void writeToFile() {
 		increment++;
 		char gs[80];
 		char oc[80];
+		float fd; // Frequency vs. Drift velocity
+		char fds[80];
+		char hd[80]; // Hz vs. deg/s
 		if (single) {
 			sprintf(gs, "Single Bar");
 		}
@@ -2608,7 +2621,17 @@ void writeToFile() {
 		else {
 			sprintf(oc, "Open");
 		}
-		printf("\nFreq = %f Hz, %s, %s, %f deg", 120.0/delay, gs, oc, viewingAngle);
+		if (drifting) {
+			fd = 360 * driftVel / (2.0*PI*0.307975*1342.281879*(1.0 / 120.0));
+			sprintf(fds, "Drift Vel");
+			sprintf(hd, "deg/s");
+		}
+		else {
+			fd = 120.0 / delay;
+			sprintf(fds, "Freq");
+			sprintf(hd, "Hz");
+		}
+		printf("\n%s = %f %s, %s, %s, %f deg", fds, fd, hd, gs, oc, viewingAngle);
 	}
 	else {
 		printf("\nOur file cannot be written to");
@@ -2755,10 +2778,10 @@ void speedManager(void) {
 		//aggrlx += lx;
 		//aggrlx += lx * (double(delta_t) / double(fps_frames))c / 1000;
 		if (drifting) {
-			xp += driftVel;
+			xp += (-1 + 2 * horizontal) * driftVel;
 		}
 		else if (spinning) {
-			xp = -sinf(((float)it / (float)(delay / 2)) * (float)PI) * boost / 2.0;
+			xp = - (-1 + 2 * horizontal) * sinf(((float)it / (float)(delay / 2)) * (float)PI) * boost / 2.0;
 		}
 		else {
 			xp = -sinf(((float)it / (float)(delay / 2)) * (float)PI) * boost;
@@ -2788,8 +2811,8 @@ void speedManager(void) {
 			currai4[queueit] = tempData[4];
 			currai5[queueit] = tempData[5];
 			currai6[queueit] = (int64)currentData[i + (read * 6)];
-			currxp[queueit] = tempxp;
-			currxpcl[queueit] = tempxp - aggrlx;
+			currxp[queueit] = fmod(tempxp, 2*center) - center;
+			currxpcl[queueit] = fmod(tempxp - aggrlx, 2*center) - center;
 			queueit++;
 		}
 		
@@ -3096,7 +3119,7 @@ void letter_pressed(unsigned char key, int x, int y) {
 		printf("\nInput viewing angle in degrees: ");
 		scanf("%f", &degree);
 		viewingAngle = degree;
-		barwidth = (float) 0.307975 * tanf(degree * PI / (2.0 * 180.0)) * 1342.281879;
+		barwidth = (float)(9.0 / 16.0) * 0.307975 * tanf(degree * PI / (2.0 * 180.0)) * 1342.281879;
 		printf("%f", barwidth);
 		glutPostRedisplay();
 		break;
@@ -3104,7 +3127,7 @@ void letter_pressed(unsigned char key, int x, int y) {
 		printf("\nInput viewing angle in degrees: ");
 		scanf("%f", &degree);
 		viewingAngle = degree;
-		barwidth = (float) 0.307975 * tanf(degree * PI / (2.0 * 180.0)) * 1342.281879;
+		barwidth = (float)(9.0 / 16.0) * 0.307975 * tanf(degree * PI / (2.0 * 180.0)) * 1342.281879;
 		printf("%f", barwidth);
 		glutPostRedisplay();
 		break;
