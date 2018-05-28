@@ -31,8 +31,8 @@
 
 
 /*
- * Global variable helpers
- **/
+* Global variable helpers
+**/
 static unsigned int fps_start = 0;
 static unsigned int fps_frames = 0;
 int it = 0, it1 = 0; //iterator for iterator
@@ -48,10 +48,10 @@ float xp = 0, yp = 0;
 float boost = 175.0;
 //const float weight = 0.00202f;		// This is the moth's weight
 float weight = 0.00202f;		// This is the moth's weight
-//const float width = 1167.883212f;
+								//const float width = 1167.883212f;
 const float width = 1342.281879f;
 const float threshold = 0.0025;
-float xAccelArr[5] = { -0.5f, -0.1f, 0.0f, 0.1f, 0.5f};
+float xAccelArr[5] = { -0.5f, -0.1f, 0.0f, 0.1f, 0.5f };
 float xAccel = xAccelArr[xAccelIt];
 int barwidthIt = 1;
 //float barwidthArr[3] = { 145.8f / 2, 221.5f / 2, 300.9f / 2 };
@@ -65,7 +65,7 @@ int bars[18] = { -32, -28, -24, -20, -16, -12, -8, -4, 0, 4, 8, 12, 16, 20, 24, 
 bool isRight[18] = { false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true }; //This keeps track of the rightmost bar
 bool isLeft[18] = { true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false }; //This keeps track of the leftmost bar
 
-// angle of rotation for the camera direction
+																																				   // angle of rotation for the camera direction
 float angle = 0.0;
 // actual vector representing the camera's direction
 float lx = 0.0f, lz = -1.0f;
@@ -103,7 +103,7 @@ bool closedLoop = 0;
 bool horizontal = 0; //True if stimuli are horizontal bars.
 bool spinning = 0; //True if stimuli are spinning spokes.
 float viewingAngle = 30; //This viewing angle will be used for the spokes.
-//float angle = 0;
+						 //float angle = 0;
 float angularVel = 0;
 float angularAcc = 0;
 bool single = 0; //True if single-bar
@@ -1052,23 +1052,23 @@ void draw17()
 }
 
 /*
- * OpenGL function for drawing our bar
- */
+* OpenGL function for drawing our bar
+*/
 void display() {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clears colors
 
 	glColor3f(255, 255, 255); // color white for our rectangle is (255, 255, 255); color yellow is (255, 255, 0)
 
-	/*
-	if (centering) {
-		gluLookAt(0.0f, 0.0f, 0.0f,
-				  0.0f, 0.0f, -1.0f,
-				  0.0f, 1.0f, 0.0f);
-	*/
-	//} else {
-	//if (((xp - (aggrlx + lx) < -325) && (lx > 0)) || ((xp - (aggrlx + lx) > 325) && (lx < 0))) {	// This is supposed to keep the bar on the screen
-	//	lx = 0;
-	//}
+							  /*
+							  if (centering) {
+							  gluLookAt(0.0f, 0.0f, 0.0f,
+							  0.0f, 0.0f, -1.0f,
+							  0.0f, 1.0f, 0.0f);
+							  */
+							  //} else {
+							  //if (((xp - (aggrlx + lx) < -325) && (lx > 0)) || ((xp - (aggrlx + lx) > 325) && (lx < 0))) {	// This is supposed to keep the bar on the screen
+							  //	lx = 0;
+							  //}
 	if (horizontal) {
 		center = 400;
 	}
@@ -1083,7 +1083,7 @@ void display() {
 				x, 0.0f, z + lz,
 				upx, upy, 0.0f);
 			float barTemp = 0.0;
-		
+
 			GLfloat verticesTemp0[216] = { 400, 400 + yp, 0, 0, 0, 1, 1, 1, 1,              // v0 (front)
 				400, 400 + yp, 0, 0, 0, 1, 1, 1, 1,              // v1
 				400 + 1000 * cosf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, 0, 0, 0, 1, 1, 1, 1,              // v2
@@ -1114,7 +1114,7 @@ void display() {
 				400, 400 + yp, -10, 0, 0, -1, 1, 1, 1,              // v6
 				400, 400 + yp, -10, 0, 0, -1, 1, 1, 1 };            // v5
 			memcpy(vertices0, verticesTemp0, sizeof(verticesTemp0));
-		
+
 			barTemp = 2.0;
 
 			GLfloat verticesTemp1[216] = { 400, 400 + yp, 0, 0, 0, 1, 1, 1, 1,              // v0 (front)
@@ -1125,7 +1125,7 @@ void display() {
 				400, 400 + yp, 0, cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v0 (right)
 				400 + 1000 * cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, 0,  cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v3
 				400 + 1000 * cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0), 400 + 1000 * sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost))*PI / 180.0) + yp, -10, cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v4
-				400, 400 + yp, -10, cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle  + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v5
+				400, 400 + yp, -10, cosf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), sinf((barTemp*viewingAngle + viewingAngle + (xp*360.0 / boost) + 90)*PI / 180.0), 0, 1, 1, 1,              // v5
 
 				400, 400 + yp, 0, 0, 1, 0, 1, 1, 1,              // v0 (top)
 				400, 400 + yp, -10, 0, 1, 0, 1, 1, 1,              // v5
@@ -1147,7 +1147,7 @@ void display() {
 				400, 400 + yp, -10, 0, 0, -1, 1, 1, 1,              // v6
 				400, 400 + yp, -10, 0, 0, -1, 1, 1, 1 };            // v5
 			memcpy(vertices1, verticesTemp1, sizeof(verticesTemp1));
-		
+
 			barTemp = 4.0;
 
 			GLfloat verticesTemp2[216] = { 400, 400 + yp, 0, 0, 0, 1, 1, 1, 1,              // v0 (front)
@@ -1721,10 +1721,10 @@ void display() {
 					//printf("Moving leftmost bar to the right\n");
 				}
 				else if (single && (center + (bars[i] - 1) * barwidth + xp) >= aggrlx + center * (-2 + (horizontal * 6))) { //center * 4) { //When single bar and the leftmost edge of the bar goes over 1000, send it to just below zero
-					bars[i] -= (int)(2000/barwidth); //Why 16? who knows
+					bars[i] -= (int)(2000 / barwidth); //Why 16? who knows
 				}
 				else if (single && (center + (bars[i] + 1) * barwidth + xp) <= aggrlx + center * (4 + (horizontal * -6))) {//- center * 2) { //When single bar and the rightmost edge of the bar goes under -200, send it to just over 800
-					bars[i] += (int)(2000/barwidth);
+					bars[i] += (int)(2000 / barwidth);
 				}
 			}
 
@@ -2558,17 +2558,17 @@ void display() {
 }
 
 /*
- * Tests to see if the file exists.
- **/
+* Tests to see if the file exists.
+**/
 inline bool exists_test3(const std::string& name) {
 	struct stat buffer;
 	return (stat(name.c_str(), &buffer) == 0);
 }
 
 /*
- * Allows for the user to printout data obtain from NIDAQ channels.
- * Currently will start outputting to file after trigger has been pressed.
- **/
+* Allows for the user to printout data obtain from NIDAQ channels.
+* Currently will start outputting to file after trigger has been pressed.
+**/
 void writeToFile() {
 	FILE * fileP = NULL;
 
@@ -2640,8 +2640,8 @@ void writeToFile() {
 }
 
 /*
- *  Calculates the force along the x-axis, averaged over the most recent samples. The units are in Newtons.
- **/
+*  Calculates the force along the x-axis, averaged over the most recent samples. The units are in Newtons.
+**/
 float64 calcFeedback() {
 	float64 avgai0 = 0;
 	for (int i = 0; i < read; i++) {
@@ -2677,9 +2677,9 @@ float64 calcFeedback() {
 }
 
 /*
- * Allows for the conversion of voltages into force and torque.
- **/
- float64 * matrixMult(float64 ai0, float64 ai1, float64 ai2, float64 ai3, float64 ai4, float64 ai5) { 
+* Allows for the conversion of voltages into force and torque.
+**/
+float64 * matrixMult(float64 ai0, float64 ai1, float64 ai2, float64 ai3, float64 ai4, float64 ai5) {
 
 	float64 Fx = ((-0.000352378) * ai0) + (0.020472451 * ai1) + ((-0.02633045) * ai2) + ((-0.688977299) * ai3) + (0.000378075 * ai4) + (0.710008955 * ai5);
 	float64 Fy = ((-0.019191418) * ai0) + (0.839003543 * ai1) + ((-0.017177775) * ai2) + ((-0.37643613) * ai3) + (0.004482987 * ai4) + ((-0.434163392) * ai5);
@@ -2687,7 +2687,7 @@ float64 calcFeedback() {
 	float64 Tx = ((-0.316303442) * ai0) + (5.061378026 * ai1) + (4.614179159 * ai2) + ((-2.150699522) * ai3) + ((-4.341889297) * ai4) + ((-2.630773662) * ai5);
 	float64 Ty = ((-5.320003676) * ai0) + ((-0.156640061) * ai1) + (2.796170871 * ai2) + (4.206523866 * ai3) + (2.780562472 * ai4) + ((-4.252850011) * ai5);
 	float64 Tz = ((-0.056240509) * ai0) + (3.091367987 * ai1) + (0.122101875 * ai2) + (2.941467741 * ai3) + (0.005876647 * ai4) + (3.094672928 * ai5);
-	
+
 	Tx = Tx + 94.5 * Fy;
 	Ty = Ty - 94.5 * Fx;
 
@@ -2695,34 +2695,34 @@ float64 calcFeedback() {
 	return transformedData;
 }
 
- bool WGLExtensionSupported(const char *extension_name)
- {
-	 // this is pointer to function which returns pointer to string with list of all wgl extensions
-	 PFNWGLGETEXTENSIONSSTRINGEXTPROC _wglGetExtensionsStringEXT = NULL;
+bool WGLExtensionSupported(const char *extension_name)
+{
+	// this is pointer to function which returns pointer to string with list of all wgl extensions
+	PFNWGLGETEXTENSIONSSTRINGEXTPROC _wglGetExtensionsStringEXT = NULL;
 
-	 // determine pointer to wglGetExtensionsStringEXT function
-	 _wglGetExtensionsStringEXT = (PFNWGLGETEXTENSIONSSTRINGEXTPROC)wglGetProcAddress("wglGetExtensionsStringEXT");
+	// determine pointer to wglGetExtensionsStringEXT function
+	_wglGetExtensionsStringEXT = (PFNWGLGETEXTENSIONSSTRINGEXTPROC)wglGetProcAddress("wglGetExtensionsStringEXT");
 
-	 if (_wglGetExtensionsStringEXT == 0 ||
-		 (_wglGetExtensionsStringEXT == (void*)0x1) || (_wglGetExtensionsStringEXT == (void*)0x2) || (_wglGetExtensionsStringEXT == (void*)0x3) ||
-		 (_wglGetExtensionsStringEXT == (void*)-1))
-	 {
-		 int a = 23;
-		 HMODULE module = LoadLibraryA("opengl32.dll");
-		 _wglGetExtensionsStringEXT = (PFNWGLGETEXTENSIONSSTRINGEXTPROC)GetProcAddress(module, "wglGetExtensionsStringEXT");
-	 }
+	if (_wglGetExtensionsStringEXT == 0 ||
+		(_wglGetExtensionsStringEXT == (void*)0x1) || (_wglGetExtensionsStringEXT == (void*)0x2) || (_wglGetExtensionsStringEXT == (void*)0x3) ||
+		(_wglGetExtensionsStringEXT == (void*)-1))
+	{
+		int a = 23;
+		HMODULE module = LoadLibraryA("opengl32.dll");
+		_wglGetExtensionsStringEXT = (PFNWGLGETEXTENSIONSSTRINGEXTPROC)GetProcAddress(module, "wglGetExtensionsStringEXT");
+	}
 
-	 if (strstr(_wglGetExtensionsStringEXT(), extension_name) == NULL)
-	 {
-		 // string was not found
-		 printf("\nExtension not supported");
-		 return false;
-	 }
+	if (strstr(_wglGetExtensionsStringEXT(), extension_name) == NULL)
+	{
+		// string was not found
+		printf("\nExtension not supported");
+		return false;
+	}
 
-	 // extension is supported
-	 printf("\nExtension supported");
-	 return true;
- }
+	// extension is supported
+	printf("\nExtension supported");
+	return true;
+}
 
 float64 biasing(float64 *readArray) {
 	float64 avgai = 0;
@@ -2740,9 +2740,9 @@ float64 biasing(float64 *readArray) {
 	return avgai;
 }
 /*
- * This function allows to change the speed of the bar
- * @param speed - value parameter given by the glutTimerFunc
- */
+* This function allows to change the speed of the bar
+* @param speed - value parameter given by the glutTimerFunc
+*/
 //void speedManager(int speed) {
 void speedManager(void) {
 	//printf("\n%f", lx);
@@ -2781,7 +2781,7 @@ void speedManager(void) {
 			xp += (-1 + 2 * horizontal) * driftVel;
 		}
 		else if (spinning) {
-			xp = - (-1 + 2 * horizontal) * sinf(((float)it / (float)(delay / 2)) * (float)PI) * boost / 2.0;
+			xp = -(-1 + 2 * horizontal) * sinf(((float)it / (float)(delay / 2)) * (float)PI) * boost / 2.0;
 		}
 		else {
 			xp = -sinf(((float)it / (float)(delay / 2)) * (float)PI) * boost;
@@ -2802,7 +2802,7 @@ void speedManager(void) {
 				queueit = 0;
 			}
 			//printf("%f\n", currentData[i]);
-		    float64 * tempData = matrixMult((currentData[i] - bias0), (currentData[i + read] - bias1), (currentData[i + (read * 2)] - bias2), (currentData[i + (read * 3)] - bias3), (currentData[i + (read * 4)] - bias4), (currentData[i + (read * 5)] - bias5));
+			float64 * tempData = matrixMult((currentData[i] - bias0), (currentData[i + read] - bias1), (currentData[i + (read * 2)] - bias2), (currentData[i + (read * 3)] - bias3), (currentData[i + (read * 4)] - bias4), (currentData[i + (read * 5)] - bias5));
 			currai0[queueit] = tempData[0];
 			//printf("%f", tempData[0]);
 			currai1[queueit] = tempData[1];
@@ -2811,12 +2811,12 @@ void speedManager(void) {
 			currai4[queueit] = tempData[4];
 			currai5[queueit] = tempData[5];
 			currai6[queueit] = (int64)currentData[i + (read * 6)];
-			currxp[queueit] = fmod(tempxp, 2*center) - center;
-			currxpcl[queueit] = fmod(tempxp - aggrlx, 2*center) - center;
+			currxp[queueit] = fmod(tempxp, 2 * center) - center;
+			currxpcl[queueit] = fmod(tempxp - aggrlx, 2 * center) - center;
 			queueit++;
 		}
-		
-		float F = (-1 + 2 * horizontal) * calcFeedback();
+
+		float F = -(-1 + 2 * horizontal) * calcFeedback();
 		if (spinning) {
 			if (centering) {
 
@@ -2833,11 +2833,11 @@ void speedManager(void) {
 			//if (F == 0) {
 			/*
 			if (lx == 0) {
-				increment = (float)(F / weight) * width * read * (1.0f / 10000.0f) * (1.0f / 120.0f);
+			increment = (float)(F / weight) * width * read * (1.0f / 10000.0f) * (1.0f / 120.0f);
 			}
 			else {
-				//increment = (float)(F / abs(F)) * (abs(F) - (coeff * (lx * (1.0f / width) * (120.0f / 1.0f)) * (lx * (1.0f / width) * (120.0f / 1.0f))) / (weight)) * width * read * (1.0f / 10000.0f) * (1.0f / 120.0f);
-				increment = (float)(F -(lx / abs(lx)) * (coeff * (lx * (1.0f / width) * (120.0f / 1.0f)) * (lx * (1.0f / width) * (120.0f / 1.0f))) / (weight)) * width * read * (1.0f / 10000.0f) * (1.0f / 120.0f);
+			//increment = (float)(F / abs(F)) * (abs(F) - (coeff * (lx * (1.0f / width) * (120.0f / 1.0f)) * (lx * (1.0f / width) * (120.0f / 1.0f))) / (weight)) * width * read * (1.0f / 10000.0f) * (1.0f / 120.0f);
+			increment = (float)(F -(lx / abs(lx)) * (coeff * (lx * (1.0f / width) * (120.0f / 1.0f)) * (lx * (1.0f / width) * (120.0f / 1.0f))) / (weight)) * width * read * (1.0f / 10000.0f) * (1.0f / 120.0f);
 			}
 			*/
 			if (centering) {
@@ -2846,8 +2846,8 @@ void speedManager(void) {
 				centered = 1;
 			}
 			else if ((F*F) < 5 && abs(F) > threshold && closedLoop && test) { // Do something to catch the NaN problem
-				//lx = calcFeedback();
-				//lx += calcFeedback()/moth's weight in kg * 1574.80315 pixels/m * read * 1.0/10000.0 * 1.0/120.0;
+																			  //lx = calcFeedback();
+																			  //lx += calcFeedback()/moth's weight in kg * 1574.80315 pixels/m * read * 1.0/10000.0 * 1.0/120.0;
 				lx = (float)(F / (weight)) * width * read * (1.0f / 10000.0f) * (1.0f / 120.0f);
 			}
 			//else if ((F*F) < 5 && abs(F) > threshold && closedLoop) {
@@ -2871,14 +2871,14 @@ void speedManager(void) {
 					}
 				}
 				//if (!(F > 0 && lx <= 0 && increment <= 0) && !(F < 0 && lx >= 0 && increment >= 0)) {
-				if (!(F > 0 && lx <= 0 && increment <= 0) && !(F < 0 && lx >= 0 && increment >= 0)) {
-				//if (1) {
+				if ((!(F > 0 && lx <= 0 && increment <= 0) && !(F < 0 && lx >= 0 && increment >= 0))) {
+					//if (1) {
 					printf("\nActually doing drag stuff");
 					printf("\n%f", F);
 					printf("\n%f", increment);
 					printf("\n%f", lx);
 					printf("\n%f", lx / abs(lx));
-					lx += increment;
+					lx -= increment;
 				}
 				else {
 					//printf("\nNot working but %f", increment);
@@ -2892,7 +2892,7 @@ void speedManager(void) {
 		}
 
 		glutPostRedisplay(); //redraws window
-		//glutTimerFunc(4, speedManager, 0);
+							 //glutTimerFunc(4, speedManager, 0);
 		glutIdleFunc(speedManager);
 
 	}
@@ -2905,9 +2905,9 @@ void speedManager(void) {
 }
 
 /*
- * Takes in various key inputs.
- * Deals more with the movement of our bar.
- **/
+* Takes in various key inputs.
+* Deals more with the movement of our bar.
+**/
 void key_pressed(int key, int x, int y) {
 	float fraction = 0.1f;
 	switch (key) {
@@ -2950,11 +2950,11 @@ void key_pressed(int key, int x, int y) {
 
 
 /*
- * Callback function to retrieve key value movement
- * @param key - ASCII value for key input 
- * @param x -  n/a
- * @param y - n/a
- */
+* Callback function to retrieve key value movement
+* @param key - ASCII value for key input
+* @param x -  n/a
+* @param y - n/a
+*/
 void letter_pressed(unsigned char key, int x, int y) {
 	float degree;
 	float frequency;
@@ -2962,7 +2962,7 @@ void letter_pressed(unsigned char key, int x, int y) {
 	float c;
 	switch (key) {
 	case 98: //b
-		///*
+			 ///*
 		if (clear) {
 			//yp = 0;
 			clear = false;
@@ -2976,7 +2976,7 @@ void letter_pressed(unsigned char key, int x, int y) {
 		glutPostRedisplay();
 		break;
 	case 66: //B
-		///*
+			 ///*
 		if (clear) {
 			//yp = 0;
 			clear = false;
