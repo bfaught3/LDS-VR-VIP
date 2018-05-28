@@ -2816,7 +2816,7 @@ void speedManager(void) {
 			queueit++;
 		}
 		
-		float F = calcFeedback();
+		float F = (-1 + 2 * horizontal) * calcFeedback();
 		if (spinning) {
 			if (centering) {
 
@@ -2870,12 +2870,14 @@ void speedManager(void) {
 						increment = (float)((F - (coeff * (lx * (1.0f / width) * (120.0f / 1.0f)))) / (weight)) * width * read * (1.0f / 10000.0f) * (1.0f / 120.0f);
 					}
 				}
+				//if (!(F > 0 && lx <= 0 && increment <= 0) && !(F < 0 && lx >= 0 && increment >= 0)) {
 				if (!(F > 0 && lx <= 0 && increment <= 0) && !(F < 0 && lx >= 0 && increment >= 0)) {
 				//if (1) {
-					//printf("Actually doing drag stuff");
-					//printf("\n%f", F);
-					//printf("\n%f", increment);
-					//printf("\n%f", lx / abs(lx));
+					printf("\nActually doing drag stuff");
+					printf("\n%f", F);
+					printf("\n%f", increment);
+					printf("\n%f", lx);
+					printf("\n%f", lx / abs(lx));
 					lx += increment;
 				}
 				else {
@@ -3127,7 +3129,7 @@ void letter_pressed(unsigned char key, int x, int y) {
 		printf("\nInput viewing angle in degrees: ");
 		scanf("%f", &degree);
 		viewingAngle = degree;
-		barwidth = (float)(9.0 / 16.0) * 0.307975 * tanf(degree * PI / (2.0 * 180.0)) * 1342.281879;
+		barwidth = (float)(9 / 16) * 0.307975 * tanf(degree * PI / (2.0 * 180.0)) * 1342.281879;
 		printf("%f", barwidth);
 		glutPostRedisplay();
 		break;
