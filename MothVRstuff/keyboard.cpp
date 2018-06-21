@@ -1687,15 +1687,19 @@ void display() {
 		}
 		else {
 			///*
-			if ((horizontal && !changingFromVert) || changingFromHoriz) {
+			//if ((horizontal && !changingFromVert) || changingFromHoriz) {
+			if ((!changingFromHoriz || changingFromVert) && !horizontal) {
 				gluLookAt(x + lx, 0.0f, z,
 					x + lx, 0.0f, z + lz,
 					0.0f, 1.0f, 0.0f);
+				changingFromVert = 0;
 			}
-			else if (!changingFromHoriz || changingFromVert) {
+			//else if (!changingFromHoriz || changingFromVert) {
+			else if ((horizontal && !changingFromVert) || changingFromHoriz) {
 				gluLookAt(x, 0.0f + lx, z,
 					x, 0.0f + lx, z + lz,
 					0.0f, 1.0f, 0.0f);
+				changingFromHoriz = 0;
 			}
 			//*/
 
@@ -1739,7 +1743,9 @@ void display() {
 				}
 			}
 
-			if (!horizontal && !spinning) {
+			//if (!horizontal && !spinning) {
+			if (horizontal) {
+
 
 				int barTemp = bars[0];
 
@@ -3215,6 +3221,18 @@ void writeToFile() {
 		increment++;
 		char gs[80];
 		char oc[80];
+		char dh[80]; //Degrees/s vs Hz
+		float dhv;
+		char rpy[80]; //Roll, pitch, or yaw
+		if (spinning) {
+			sprintf(rpy, "Roll");
+		}
+		else if (horizontal) {
+			sprintf(rpy, "Pitch");
+		}
+		else {
+			sprintf(rpy, "Yaw");
+		}
 		if (single) {
 			sprintf(gs, "Single Bar");
 		}
@@ -3227,7 +3245,19 @@ void writeToFile() {
 		else {
 			sprintf(oc, "Open");
 		}
-		printf("\nFreq = %f Hz, %s, %s, %f deg", 120.0 / delay, gs, oc, viewingAngle);
+		if (drifting) {
+			sprintf(dh, "degrees per second");
+			dhv = driftVel * 360.0 / (2.0*PI*0.307975*1342.281879*(1.0 / 120.0));
+			//dhv = driftVel * 60.0;
+		}
+		else {
+			sprintf(dh, "Hz");
+			dhv = 120.0 / delay;
+			//dhv = 60.0 / delay;
+		}
+		//printf("\nFreq = %f Hz, %s, %s, %f deg", 120.0 / delay, gs, oc, viewingAngle);
+		//printf("\nFreq = %f Hz, %s, %s, %f deg", 1000.0 / delay, gs, oc, viewingAngle);
+		printf("\n%s stimulus, Freq = %f %s, %s, %s, %f deg", rpy, dhv, dh, gs, oc, viewingAngle);
 	}
 	else {
 		printf("\nOur file cannot be written to");
@@ -3252,10 +3282,17 @@ float64 calcFeedback() {
 		}
 		else if (horizontal) { //If horizontal, read from Fz
 			if (j < 0) {
-				avgai0 += (1 - 2 * horizontal) * currai2[j + 200100];
+				//avgai0 += (1 - 2 * horizontal) * currai2[j + 200100];
+				//avgai0 += currai2[j + 200100];
+
+				//Now we're reading from Tx
+				avgai0 += currai3[j + 200100];
+
 			}
 			else {
-				avgai0 += (1 - 2 * horizontal) * currai2[j];
+				//avgai0 += (1 - 2 * horizontal) * currai2[j];
+				avgai0 += currai2[j];
+
 			}
 		}
 		else {
@@ -3374,13 +3411,16 @@ void speedManager(void) {
 		//aggrlx += lx;
 		//aggrlx += lx * (double(delta_t) / double(fps_frames))c / 1000;
 		if (drifting) {
-			xp += (1 - 2 * horizontal) * driftVel;
+			//xp += (1 - 2 * horizontal) * driftVel;
+			xp += driftVel;
 		}
 		else if (spinning) {
-			xp = -(1 - 2 * horizontal) * sinf(((float)it / (float)(delay / 2)) * (float)PI) * boost / 2.0;
+			//xp = -(1 - 2 * horizontal) * sinf(((float)it / (float)(delay / 2)) * (float)PI) * boost / 2.0;
+			xp = -sinf(((float)it / (float)(delay / 2)) * (float)PI) * boost / 2.0;
 		}
 		else {
-			xp = -(1 - 2 * horizontal) * sinf(((float)it / (float)(delay / 2)) * (float)PI) * boost;
+			//xp = -(1 - 2 * horizontal) * sinf(((float)it / (float)(delay / 2)) * (float)PI) * boost;
+			xp = -sinf(((float)it / (float)(delay / 2)) * (float)PI) * boost;
 		}
 
 		DAQmxErrChk(DAQmxReadAnalogF64(taskHandle, -1, -1.0, DAQmx_Val_GroupByChannel, currentData, 1400700, &read, NULL));
@@ -3418,15 +3458,20 @@ void speedManager(void) {
 				lx = -aggrlx;
 				printf("\n%f", lx);
 				centered = 1;
+				angularAcc = 0.0;
+				angularVel = 0.0;
 			}
 			else if ((F*F) < 5 && abs(F) > threshold && closedLoop) {
-				angularAcc = F / (0.4 * weight * 0.0025) * (1.0f / 120.0f) * (1.0f / 120.0f);
+				angularAcc = ((F/1000.0) / (0.4 * weight * 0.0025)) * (1.0f / 120.0f) * (1.0f / 120.0f); // Divide torque by 1000 because it's in N*mm
 				angle += (angularAcc / 2.0) * (read * (1.0f / 10000.0f) * (120.0f / 1.0f)) * (read * (1.0f / 10000.0f) * (120.0f / 1.0f)) + angularVel * (read * (1.0f / 10000.0f) * (120.0f / 1.0f));
 				angularVel += angularAcc * (read * (1.0f / 10000.0f) * (120.0f / 1.0f));
 				printf("\nF is %f", F);
+				printf("\nRead is %f", (float)read);
+				printf("\nAngular acc is %f", angularAcc);
+				printf("\nAngular vel is %f", angularVel);
 				printf("\nxp is %f", xp);
 				printf("\nangle is %f", angle);
-				xp += - ((angle / (2 * PI)) * boost);
+				xp += - ((fmod(angle, (float)(2*PI)) / (2 * PI)) * boost);
 			}
 		}
 		else {
@@ -3446,6 +3491,8 @@ void speedManager(void) {
 				lx = -aggrlx;
 				printf("\n%f", lx);
 				centered = 1;
+				angularAcc = 0.0;
+				angularVel = 0.0;
 			}
 			else if ((F*F) < 5 && abs(F) > threshold && closedLoop && test) { // Do something to catch the NaN problem
 																			  //lx = calcFeedback();
@@ -3457,6 +3504,9 @@ void speedManager(void) {
 				//printf("Actually doing closed-loop stuff");
 				//if (abs(F) - (coeff * (lx * (1.0f / width) * (120.0f / 1.0f)) * (lx * (1.0f / width) * (120.0f / 1.0f))) >= 0) { // Make sure the drag isn't pushing the moth the other way
 				//printf("\n%f", F);
+
+
+				/* This is the CL stuff that uses the forces for feedback.
 				if (abs(F) < threshold) {
 					F = 0;
 				}
@@ -3474,17 +3524,33 @@ void speedManager(void) {
 				}
 				if (!(F > 0 && lx <= 0 && increment <= 0) && !(F < 0 && lx >= 0 && increment >= 0)) {
 					//if (1) {
-					//printf("\nActually doing drag stuff");
-					//printf("\n%f", F);
-					//printf("\n%f", increment);
-					//printf("\n%f", lx);
-					//printf("\n%f", lx / abs(lx));
+					printf("\nActually doing drag stuff");
+					printf("\n%f", F);
+					printf("\n%f", increment);
+					printf("\n%f", lx);
+					printf("\n%f", lx / abs(lx));
 					lx += increment;
 				}
 				else {
 					//printf("\nNot working but %f", increment);
 					lx = 0;
 				}
+				//*/
+
+
+				//angularAcc = ((F / 1000.0) / (0.4 * weight * 0.0025)) * (1.0f / 120.0f) * (1.0f / 120.0f); // Divide torque by 1000 because it's in N*mm
+				angularAcc = ((F / 1000.0) / (2.08/10000000.0)) * (1.0f / 120.0f) * (1.0f / 120.0f); // Divide torque by 1000 because it's in N*mm
+				angle += (angularAcc / 2.0) * (read * (1.0f / 10000.0f) * (120.0f / 1.0f)) * (read * (1.0f / 10000.0f) * (120.0f / 1.0f)) + angularVel * (read * (1.0f / 10000.0f) * (120.0f / 1.0f));
+				angularVel += angularAcc * (read * (1.0f / 10000.0f) * (120.0f / 1.0f));
+				printf("\nF is %f", F);
+				printf("\nRead is %f", (float)read);
+				printf("\nAngular acc is %f", angularAcc);
+				printf("\nAngular vel is %f", angularVel);
+				printf("\nxp is %f", xp);
+				printf("\nangle is %f", angle);
+				//xp += -((fmod(angle, (float)(2 * PI)) / (2 * PI)) * boost);
+				xp += angle * 0.1732359375 * width;
+				//lx = angularVel * 0.1732359375 * width;
 			}
 			//aggrlx += lx;
 			//aggrlx += lx * (double(delta_t) / double(fps_frames)) / 1000;
@@ -3928,7 +3994,7 @@ int main(int argc, char** argv) {
 	//printf("Press left or right arrows to move our rectangle\n");
 	printf("Enter the weight of the moth in grams: ");
 	scanf("%f", &tempWeight);
-	weight = tempWeight / 1000;
+	weight = tempWeight / 1000.0;
 	printf("Please wait about 20 seconds\n");
 	/*
 	** Add the closed-loop stuff here.
@@ -3984,8 +4050,9 @@ int main(int argc, char** argv) {
 
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGB);
-	glutInitWindowSize(800, 454);
-	glutInitWindowPosition(100, 100);
+	//glutInitWindowSize(800, 454);
+	glutInitWindowSize(450, 800);
+	glutInitWindowPosition(2400, 100);
 	glutCreateWindow("Virtual Reality - Closed Loop");
 
 
@@ -4011,7 +4078,9 @@ int main(int argc, char** argv) {
 	//printf("finished speedManager\n");
 
 	glClearColor(0, 0, 0, 0);
-	gluOrtho2D(0.0, 800, 173, 627);
+	//gluOrtho2D(0.0, 800, 173, 627);
+	gluOrtho2D(175, 625, 0, 800);
+
 
 	glutSpecialFunc(key_pressed);
 	glutKeyboardFunc(letter_pressed);
